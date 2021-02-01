@@ -1,0 +1,18 @@
+If you are updating from sdk 35 or 36 this is how it worked for me
+
+open pangeareact folder with console
+try npm install -g expo-cli
+    if that worked, run npm install and open the app
+
+if that doesn't work or if you get the 
+permissions issue and sudo npm install -g expo-cli doesn't work~
+
+go to where your global npm data is stored~
+    for me it was in C:\Users\[Username]\AppData\Roaming
+        delete the npm and npm-cache folders
+        uninstall and reinstall node.js
+        try npm install -g expo-cli again 
+
+if that worked then run npm install and the app should be updated
+
+    

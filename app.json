@@ -1,0 +1,39 @@
+{
+  "name": "SignShare by Pangea",
+  "displayName": "SignShare by Pangea",
+  "expo": {
+    "name": "SignShare by Pangea",
+    "slug": "SignSharebyPangea",
+    "privacy": "unlisted",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "entryPoint": "node_modules/expo/AppEntry.js",
+    "icon": "assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.signshare.marketsignshare",
+      "buildNumber": "5.2.0"
+    },
+    "android": {
+      "package": "com.signshare.marketsignshare",
+      "versionCode": 21,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_PHONE_STATE",
+        "READ_CONTACTS",
+        "CAMERA_ROLL",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    }
+  }
+}
