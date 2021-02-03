@@ -23,14 +23,14 @@ export default class Login extends Component {
     super(props);
     //this is the state. this is where the components data is stored.
     this.state = {
-      // user: "rid7155",
-      // pass: "blackfoot",
+      user: "rid7155",
+      pass: "blackfoot",
       // user: "pco0124",
       // pass: "sanjuancapistrano",
       // user: "ck10",
       // pass: "phoenix",
-      user: "",
-      pass: "",
+      // user: "",
+      // pass: "",
       // user: "rse0200",
       // pass: "thibodaux",
       // user: "pst1803",

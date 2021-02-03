@@ -860,7 +860,9 @@ export default class Main extends Component {
   hideFilterGlitch = (bool) => {
     this.setState({ hideFilterGlitch: bool });
   };
+
   getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
+    //update this.state.arrgrid
     if (isMultiEditFirstTime == true) {
       setCalled(false);
       // isMultiEditFirstTime = true;

@@ -238,8 +238,10 @@ export default class PrintScreen extends Component {
     }
   };
   activateEdit = (data) => {
+    this.props.triggerMultiEdit();
     this.setState({ activateEdit: true });
     this.props.activateEditFromPrint(data);
+    //this.cancel()
   };
   deactivateEdit = () => {
     this.setState({ activateEdit: false });
@@ -254,7 +256,7 @@ export default class PrintScreen extends Component {
               uri: this.state.fileUri,
             }}
           />
-          <View style={global.row}>
+          <View style={[global.row, printScreen.buttonWrapper]}>
             <TouchableOpacity
               style={[global.tomato, global.buttonPrint]}
               onPress={() => this.cancelPDF()}
@@ -278,7 +280,12 @@ export default class PrintScreen extends Component {
             {this.state.showPDF === false &&
               this.state.showNewModalForLinks === false &&
               this.props.multiEditActivate === false && (
-                <View style={printScreen.headerCheckboxWrapper}>
+                <View
+                  style={[
+                    printScreen.headerCheckboxWrapper,
+                    printScreen.topButtonMargin,
+                  ]}
+                >
                   <Checkbox
                     selected={this.state.selectedItems}
                     onPress={() => {

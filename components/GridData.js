@@ -47,6 +47,7 @@ export default class GridData extends Component {
     super(props);
     this._isMounted = false;
     this.state = {
+      multiEditTrigger: false,
       backgroundColor: "#ececec",
       dataForEditAndPromo: [],
       arr: this.props.home_Data,
@@ -539,6 +540,9 @@ export default class GridData extends Component {
       this.setState({ showScannedItems: false, scannedArr: [] });
     }
   };
+  triggerMultiEdit = () => {
+    this.setState({ multiEditTrigger: true });
+  };
   onRowDidOpen = (rowKey) => {};
   activateSearch = (signType) => {
     this.setState({ showSearchPrompt: true, currentSignTypeID: signType });
@@ -782,9 +786,10 @@ export default class GridData extends Component {
             </Modal>
           )}
           {/* modals begin */}
-          {this.state.multiEditActivate === true && (
-            <React.Fragment>
-              {/* <View style={{ height: "50%" }}>
+          {this.state.multiEditActivate === true &&
+            this.state.multiEditTrigger === false && (
+              <React.Fragment>
+                {/* <View style={{ height: "50%" }}>
                 <GridDataEditModal
                   isScannedArrShowing={this.state.showScannedItems}
                   batchTypeID={this.props.batchTypeID}
@@ -797,33 +802,34 @@ export default class GridData extends Component {
                   isSearchedOriginally={this.props.isSearchedOriginally}
                 />
               </View> */}
-              <View style={{ height: "50%" }}>
-                <PrintScreen
-                  LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}
-                  activateEditFromPrint={this.activateEditFromPrint}
-                  multiEditActivate={true}
-                  storedSigns={[]}
-                  keepItems={this.keepItems}
-                  uncheckAll={this.uncheckAll}
-                  notify={this.props.notify}
-                  data={this.state.multipleSelectedHandlerArray}
-                  gridData_Cancel={this.multiEditCancel}
-                  headeroneFieldLabel={this.props.headeroneFieldLabel}
-                  headertwoFieldLabel={this.props.headertwoFieldLabel}
-                  headerthreeFieldLabel={this.props.headerthreeFieldLabel}
-                  delete={this.multipleSelectedHandler}
-                  ahead={this.props.ahead}
-                  currentSignTypeID={this.props.currentSignTypeID}
-                  levelUserInfoId={this.props.levelUserInfoId}
-                  levelId={this.props.levelId}
-                  refresh={this.refreshBatchEdit}
-                  batchEdit={this.props.batchEdit}
-                  currentBatch={this.state.currentBatch}
-                  refreshBatchEdit={this.props.refreshBatchEdit}
-                />
-              </View>
-            </React.Fragment>
-          )}
+                <View style={{ height: "50%" }}>
+                  <PrintScreen
+                    triggerMultiEdit={this.triggerMultiEdit}
+                    LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}
+                    activateEditFromPrint={this.activateEditFromPrint}
+                    multiEditActivate={true}
+                    storedSigns={[]}
+                    keepItems={this.keepItems}
+                    uncheckAll={this.uncheckAll}
+                    notify={this.props.notify}
+                    data={this.state.multipleSelectedHandlerArray}
+                    gridData_Cancel={this.multiEditCancel}
+                    headeroneFieldLabel={this.props.headeroneFieldLabel}
+                    headertwoFieldLabel={this.props.headertwoFieldLabel}
+                    headerthreeFieldLabel={this.props.headerthreeFieldLabel}
+                    delete={this.multipleSelectedHandler}
+                    ahead={this.props.ahead}
+                    currentSignTypeID={this.props.currentSignTypeID}
+                    levelUserInfoId={this.props.levelUserInfoId}
+                    levelId={this.props.levelId}
+                    refresh={this.refreshBatchEdit}
+                    batchEdit={this.props.batchEdit}
+                    currentBatch={this.state.currentBatch}
+                    refreshBatchEdit={this.props.refreshBatchEdit}
+                  />
+                </View>
+              </React.Fragment>
+            )}
           {this.state.showPrintScreen === true && (
             <PrintScreen
               LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}

@@ -439,8 +439,8 @@ export const gridDataEditModal = {
     flexDirection: "row",
     marginLeft: "auto",
     marginRight: "auto",
-    // marginTop: "auto",
-    // marginBottom: "auto",
+    marginTop: Platform.OS === "ios" ? "auto" : 0,
+    marginBottom: Platform.OS === "ios" ? "auto" : 0,
     // marginBottom: (Platform.OS = "android" ? "20%" : "auto"),
   },
   greyButton: {
@@ -460,7 +460,8 @@ export const gridDataEditModal = {
   modalWrapper: {
     marginLeft: "auto",
     marginRight: "auto",
-    marginTop: 20,
+    marginTop: Platform.OS === "android" ? 20 : "auto",
+    marginBottom: Platform.OS === "android" ? 0 : "auto",
     borderRadius: 10,
     width: "90%",
     justifyContent: "center",
@@ -1025,6 +1026,17 @@ export const printScreen = {
     borderColor: "lightgrey",
     borderWidth: 2,
     padding: 10,
+  },
+  buttonWrapper: {
+    flexDirection: "row",
+    marginBottom: "10%",
+    marginTop: "auto",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  topButtonMargin: {
+    flexDirection: "row",
+    marginTop: 55,
   },
   closeBackground: {
     width: "7%",
