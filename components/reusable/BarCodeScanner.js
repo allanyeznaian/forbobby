@@ -1,3 +1,8 @@
+//for petsmart
+// create function to just scan items, and if the items dont match
+//have it automatically print,
+//if items match, then press ok maybe
+
 import React, { useState, useEffect } from "react";
 import {
   Text,
@@ -130,7 +135,11 @@ export default function App(props) {
         <View style={[global.absolute, global.zIndex]}>
           <TouchableOpacity
             style={barCodeScanner.cancelWrapper}
-            onPress={() => props.handleScanner()}
+            onPress={
+              props.auditMode === true
+                ? () => props.backToHome()
+                : () => props.handleScanner()
+            }
           >
             <Text style={barCodeScanner.cancelText}>Cancel</Text>
           </TouchableOpacity>

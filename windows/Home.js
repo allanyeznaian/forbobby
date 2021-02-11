@@ -78,6 +78,7 @@ export default class Home extends Component {
         <View style={[global.container]}>
           <View style={home.wrapper}>
             <GridData
+              checkDate={this.props.checkDate}
               LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}
               nonEditable={this.props.nonEditable}
               LevelUserStoreMaxQuantityPerStore={

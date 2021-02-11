@@ -174,9 +174,12 @@ export default class GridDataEditModal extends Component {
         includeSizeField: false,
         includeQuantityField: false,
       };
-
+      // if (this.state.signData.signLastUpdated < this.props.signLastUpdated(this.state.signId)) {
+      //   this.props.gridData_Cancel();
+      // }
       data_get_data_for_edit(body).then((resp) => {
         //validation, you can find if validation is needed in the if statement just below
+
         const arr = [];
         for (let i = 0; i < resp.length; i++) {
           const obj = {
@@ -207,6 +210,7 @@ export default class GridDataEditModal extends Component {
               }),
             },
             signId: this.state.signData.id,
+            signLastUpdated: this.state.signData.signLastUpdated,
             signfieldId: "",
           };
           for (
@@ -248,6 +252,8 @@ export default class GridDataEditModal extends Component {
   };
 
   save = () => {
+    //test call here for date/time
+    let arrCheck = [];
     setTimeout(() => {
       let arr = [];
       const cool = this.state.newCountryObj;
@@ -257,7 +263,8 @@ export default class GridDataEditModal extends Component {
       let header = "a";
       let brand = "a";
       let description = "a";
-
+      //look here
+      // alert(this.state.signData.signLastUpdated);
       for (let i = 0; i < this.state.data.length; i++) {
         if (this.state.data[i].label === "Sale Price") {
           salePrice = this.state.data[i].fieldSetValue;
@@ -344,16 +351,21 @@ export default class GridDataEditModal extends Component {
                 });
             }
           }
-
+          arrCheck = newArr;
           bodyContents = {
             jsonLocalSign: JSON.stringify(newArr),
             loggedInLevelID: this.props.levelId,
           };
         }
-
+        for (let i = 0; i < arr.length; i++) {}
         const body = JSON.stringify(bodyContents);
+
         data_save_edited(body).then((resp) => {
           if (resp.Handling === "success") {
+            //look
+            const asdf = this.props.checkDate(bodyContents.jsonLocalSign);
+            alert(JSON.stringify(asdf));
+
             setTimeout(() => {
               if (
                 this.props.isScannedArrShowing === true &&

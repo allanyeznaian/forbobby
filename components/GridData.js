@@ -268,6 +268,7 @@ export default class GridData extends Component {
           ahead,
           stampId,
           levelSignStampId,
+          signLastUpdated,
         }) {
           return {
             id,
@@ -284,6 +285,7 @@ export default class GridData extends Component {
             ahead,
             stampId,
             levelSignStampId,
+            signLastUpdated,
           };
         });
       const arrayChunks = [].concat.apply(
@@ -425,6 +427,7 @@ export default class GridData extends Component {
     //loading issue when you press exit scanned
   };
   layoutMandatory = () => {
+    this.props.isLoading(false);
     if (this.props.nonEditable === true) {
       this.props.isLoading(false);
     }
@@ -569,6 +572,7 @@ export default class GridData extends Component {
   };
   //renders the rows
   renderItem = (data, rowKey) => (
+    // this.props.loading(false),
     <View
       onLayout={(event) => {
         this.layoutMandatory();
@@ -856,6 +860,7 @@ export default class GridData extends Component {
           )}
           {this.state.showEditModal === true ? (
             <GridDataEditModal
+              checkDate={this.props.checkDate}
               level={this.props.level}
               multipleSelectedHandlerArray={
                 this.state.multipleSelectedHandlerArray
@@ -1028,7 +1033,8 @@ export default class GridData extends Component {
                   windowSize={10}
                   renderItem={this.renderItem}
                   renderHiddenItem={
-                    !this.props.nonEditable ? this.renderHiddenItem : () => {}
+                    () => {}
+                    // !this.props.nonEditable ? this.renderHiddenItem : () => {}
                   }
                   leftOpenValue={this.state.width / 3}
                   rightOpenValue={-(this.state.width / 2)}

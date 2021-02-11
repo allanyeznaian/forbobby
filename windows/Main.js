@@ -37,7 +37,7 @@ import LoadingSpinner from "../components/reusable/LoadingSpinner";
 import PrintBatch from "../components/PrintSignBatch";
 import Search from "../components/Search";
 import MultiEdit from "../components/MultiEdit/MultiEdit";
-import { data_get, data_get_batches } from "../scripts/API";
+import { data_get, data_get_batches, data_check_date } from "../scripts/API";
 import { AuthSession } from "expo";
 import OrderStock from "../components/OrderStock";
 import { main, global } from "../Styles/Styles";
@@ -983,6 +983,7 @@ export default class Main extends Component {
         data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
           (resp) => {
             this.setState({
+              timeLoggedIn: new Date().getTime(),
               prevBody: [body],
               // main_AheadInfoArray: resp.Model.AheadInfo,
               searchText: "",
@@ -1023,6 +1024,7 @@ export default class Main extends Component {
 
               for (let i = 0; i < arraySigns.length; i++) {
                 const obj = {
+                  signLastUpdated: arraySigns[i].LevelSignLastUpdated,
                   levelSignId: arraySigns[i].LevelSignID,
                   id: arraySigns[i].SignID,
                   headerone: "",
@@ -1220,6 +1222,7 @@ export default class Main extends Component {
         data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
           (resp) => {
             this.setState({
+              timeLoggedIn: new Date().getTime(),
               prevBody: [body],
               // main_AheadInfoArray: resp.Model.AheadInfo,
               searchText: "",
@@ -1260,6 +1263,7 @@ export default class Main extends Component {
 
               for (let i = 0; i < arraySigns.length; i++) {
                 const obj = {
+                  signLastUpdated: arraySigns[i].LevelSignLastUpdated,
                   levelSignId: arraySigns[i].LevelSignID,
                   id: arraySigns[i].SignID,
                   headerone: "",
@@ -1536,6 +1540,63 @@ export default class Main extends Component {
   multiEditActivate = () => {
     this.refs.refsHomeGrid.multiEditActivate();
   };
+
+  checkDate = (e) => {
+    // var nameArr = names.split(',');
+    //create comma seperated items in string
+    let arr = this.state.arrGrid;
+    let arr2 = JSON.parse(e);
+    let newArr = [];
+    console.log(this.state.arrGrid[0], arr2[0]);
+    //this is comparing the login time vs the last time the signs were updated
+    for (let i = 0; i < arr.length; i++) {
+      for (let a = 0; a < arr2.length; a++) {
+        if (arr2[a].SignID === arr[i].id) {
+          //   if (new Date(arr[i].signLastUpdated) > this.state.timeLoggedIn) {
+          //     alert("DKLFNK:LDFK:LJKLD:K:LDSKLF");
+          newArr.push(arr2[a].SignID);
+          // }
+          break;
+        }
+      }
+    }
+    let unique = [...new Set(newArr)];
+    const bodyArr = unique.join(", ");
+    console.log("IS THIS THE RIGHT ONE MOFO", JSON.stringify(bodyArr));
+    const body = {
+      SignIDs: JSON.stringify(bodyArr),
+    };
+    let bool = "";
+    data_check_date({ SignIDs: bodyArr }).then((resp) => {
+      if (resp.Handling === "success") {
+        for (let i = 0; i < resp.Model.length; i++) {
+          console.log(
+            new Date(resp.Model[i].SignLastUpdated).getTime() >
+              new Date(this.state.timeLoggedIn).getTime(),
+            "     first number is bigger ?",
+            new Date(resp.Model[i].SignLastUpdated).getTime(),
+            "    vs ",
+            new Date(this.state.timeLoggedIn).getTime()
+          );
+          if (resp.Model[i].signLastUpdated > this.state.timeLoggedIn) {
+            // this.getCall("fromedit");
+            // alert("DO THE CALL");
+            //do the call
+          } else {
+            // alert("do it locally");
+            //update local signs
+          }
+        }
+      }
+    });
+    // return bool;
+    // for(let i = 0; i < SLU.length; i++){
+    //   for(let a = 0; a < newArr.length; a++){
+    //     if(SLU)
+    //   }
+    // }
+  };
+
   render() {
     return (
       <View {...this._panResponder.panHandlers}>
@@ -1776,6 +1837,7 @@ export default class Main extends Component {
                     >
                       {this.state.loadHome === true && (
                         <Home
+                          checkDate={this.checkDate}
                           LevelUserInfoBuildBatch={
                             this.state.LevelUserInfoBuildBatch
                           }
