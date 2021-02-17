@@ -56,6 +56,7 @@ export default class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      auditModeTest: "",
       firstLoginTag: false,
       // isLoading: true,
       surname: "",
@@ -69,6 +70,7 @@ export default class Main extends Component {
       showScannedItems: "",
       showScannedGrid: false,
       level: "",
+      auditMode: false,
       prevBody: [
         {
           currentAhead: "",
@@ -306,6 +308,26 @@ export default class Main extends Component {
     // this.resetTimer();
   };
 
+  backToHome = (action) => {
+    this.setState({ auditMode: false, auditModeTest: "" });
+    if (action === "goBackAllTheWay") {
+      this.refs.refsHomeGrid.exitScanned();
+      if (this.state.defaultSignTypeID === 1) {
+        this.refs.child.select({
+          Sign: "Promo",
+          SignTypeID: 1,
+        });
+      } else if (this.state.defaultSignTypeID === 8) {
+        this.setState({ firstLoginTag: true }, () => {
+          this.refs.child.select({
+            Sign: "Batch Edit",
+            SignTypeID: "Batch Edit",
+          });
+        });
+      }
+    }
+  };
+
   //timeout method
   resetTimer() {
     // clearTimeout(this.timer);
@@ -513,6 +535,9 @@ export default class Main extends Component {
   };
   navbar_SignType = (e, a, c) => {
     this.setState({ prevSearchedText: "" });
+    if (e != "Audit") {
+      this.setState({ auditMode: false });
+    }
     if (e === "Sign Batch") {
       // showpringBatchScreen is set to false and right back to true
       // so that it refreshes the print batch screen
@@ -548,6 +573,9 @@ export default class Main extends Component {
       if (this.state.loadHome === true) {
         this.uncheckAll();
       }
+    } else if (e === "Audit") {
+      this.setState({ auditMode: true });
+      this.refs.refsHomeGrid.showScanner(true, "Audit");
     } else if (e === "Tag Batch") {
       this.setState({ showprintBatchScreen: false }, () => {
         this.setState({
@@ -860,8 +888,631 @@ export default class Main extends Component {
   hideFilterGlitch = (bool) => {
     this.setState({ hideFilterGlitch: bool });
   };
+  // getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
+  //     data_get().then((resp) => {
+  //     if (resp.Handling == "success") {
+  //       const signs = resp.Model.Signs;
+  //       for (let i = 0; i < signs.length; i++) {
+  //         console.log(signs[i].LevelSignID);
+  //       }
+  //     }
+  //   });
+  // }
+
+  // getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
+  //   //this gets hit right away
+  //   // make parsing efficient
+  //   //update this.state.arrgrid
+  //   if (isMultiEditFirstTime == true) {
+  //     setCalled(false);
+  //     // isMultiEditFirstTime = true;
+  //     setTimeout(() => {
+  //       this.setState({ isLoading: false });
+  //     }, 1000);
+  //   }
+  //   if (getCalled() === false) {
+  //     setCalled(true);
+  //     if (isMultiEditFirstTime == true) {
+  //       // this.setState({currentDepartmentID:})
+  //     }
+  //     // if (this.state.searchText.length > 0) {
+  //     //   this.setState({ isSearched: true, currentDepartmentID: 0 });
+  //     // }
+  //     if (
+  //       this.state.searchText.length > 0 &&
+  //       this.state.currentSignTypeID === 8
+  //     ) {
+  //       this.setState({
+  //         prevSearchedText: this.state.searchText,
+  //         isSearchedOriginally: true,
+  //         isSearched: true,
+  //         batchTypeID: 0,
+  //         currentDepartmentID: 0,
+  //       });
+  //     } else if (this.state.searchText.length == +0) {
+  //       this.setState({
+  //         prevSearchedText: "",
+  //         isSearched: this.state.showMultiEdit === false ? false : true,
+  //         isSearchedOriginally:
+  //           this.state.showMultiEdit === false ? false : true,
+  //         searchText: "",
+  //       });
+  //     }
+  //     this.setState({ isLoading: true, showSearchPrompt: false });
+
+  //     if (this.state.showprintBatchScreen) {
+  //       this.setState({ isLoading: false });
+  //     }
+  //     setTimeout(() => {
+  //       if (
+  //         this.state.showOrderStockScreen === false &&
+  //         this.state.showprintBatchScreen === false &&
+  //         this.state.showMultiEdit === false
+  //       ) {
+  //         this.refs.refsHomeGrid.resetPagination();
+  //       }
+  //     }, 200);
+
+  //     if (!this.state.batchTypeID == 0 && isMultiEditFirstTime === false) {
+  //       this.setState({ reload: true });
+  //       if (e === "deletedMultiple") {
+  //         this.setState({
+  //           shouldNotify: true,
+  //           notificationText: "Signs Deleted",
+  //         });
+  //         this.refs.refsHomeGrid.deleteFromArray(newArr);
+  //       }
+  //       if (e === "deleted") {
+  //         this.setState({
+  //           shouldNotify: true,
+  //           notificationText: "Sign Deleted",
+  //         });
+  //       }
+
+  //       //the api call body data is all stored in state, coming
+  //       //from other components
+  //       //for example, if you choose "Next Ad", that will send over
+  //       //the correct ahead type and trigger this post request
+  //       //and populate the grid and correct dates
+  //       const body = {
+  //         currentAhead: this.state.currentAhead,
+  //         currentLevelID: this.state.data.data.Model.LevelID,
+  //         currentSignTypeID: this.state.currentSignTypeID,
+  //         currentLevelTypeID: this.state.levelTypeID,
+  //         currentDepartmentID: this.state.currentDepartmentID,
+  //         batchTypeID:
+  //           this.state.searchText.length > 0
+  //             ? 0
+  //             : this.state.batchTypeID
+  //             ? this.state.batchTypeID
+  //             : 0,
+  //         searchValues:
+  //           this.state.batchTypeID.length < 1
+  //             ? this.state.isSearched === true
+  //               ? this.state.prevSearchedText
+  //               : this.state.searchText
+  //             : this.state.searchText,
+  //       };
+
+  //       setTimeout(() => {
+  //         if (
+  //           body.currentAhead != this.state.prevBody[0].currentAhead ||
+  //           body.currentLevelID != this.state.prevBody[0].currentLevelID ||
+  //           body.currentSignTypeID !=
+  //             this.state.prevBody[0].currentSignTypeID ||
+  //           body.currentLevelTypeID !=
+  //             this.state.prevBody[0].currentLevelTypeID ||
+  //           body.currentDepartmentID !=
+  //             this.state.prevBody[0].currentDepartmentID ||
+  //           body.batchTypeID != this.state.prevBody[0].batchTypeID ||
+  //           this.state.showprintBatchScreen == false
+  //         ) {
+  //           this.setState({ showScannedGrid: false, showScannedItems: false });
+  //           if (
+  //             this.state.showBatchEditScreen === false &&
+  //             this.state.showprintBatchScreen === false &&
+  //             this.state.showPrintScreen === false &&
+  //             this.state.showScannedGrid === true &&
+  //             this.state.showScannedItems === true
+  //           ) {
+  //             this.refs.refsHomeGrid.noScanner();
+  //           }
+  //         }
+  //       }, 50);
+  //       //this is the actual api call
+  //       data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
+  //         (resp) => {
+  //           this.setState({
+  //             timeLoggedIn: new Date().getTime(),
+  //             prevBody: [body],
+  //             // main_AheadInfoArray: resp.Model.AheadInfo,
+  //             searchText: "",
+  //           });
+  //           if (!resp.Model.AheadInfo) {
+  //             this.setState({ main_AheadInfoArray: getAhead() });
+  //           } else if (resp.Model.AheadInfo[0] == null) {
+  //             this.setState({ main_AheadInfoArray: getAhead() });
+  //           } else {
+  //             this.setState({ main_AheadInfoArray: resp.Model.AheadInfo });
+  //           }
+  //           this.uncheckAll();
+  //           this.setState({
+  //             reload: false,
+  //             trigger: true,
+  //             showBatchEditScreenInitialScreen: false,
+  //           });
+  //           if (resp.Model.Signs.length < 1) {
+  //             this.setState({ isLoading: false });
+  //           }
+  //           if (resp.Handling === "success") {
+  //             //this removes duplicates when searching items
+  //             if (body.searchValues.length > 0) {
+  //               // const arr = resp.Model.Signs;
+  //               // for (let i = 0; i < arr.length; i++) {
+  //               //   arr.map((e, index) => {
+  //               //     if (arr[i].LevelSignID === e.LevelSignID && index != i) {
+  //               //       arr.splice(index, 1);
+  //               //     }
+  //               //   });
+  //               // }
+  //             }
+  //             let newDate = /([^T]+)/;
+  //             const arraySigns = resp.Model.Signs;
+  //             const arrayLevelFields = resp.Model.LevelFields;
+  //             const arrGrid = [];
+  //             const promoLevelStamps = [];
+
+  //             for (let i = 0; i < arraySigns.length; i++) {
+  //               const obj = {
+  //                 signLastUpdated: arraySigns[i].LevelSignLastUpdated,
+  //                 levelSignId: arraySigns[i].LevelSignID,
+  //                 id: arraySigns[i].SignID,
+  //                 headerone: "",
+  //                 headeroneFieldLabel: "",
+  //                 headertwo: "",
+  //                 headertwoFieldLabel: "",
+  //                 headerthree: "",
+  //                 headerthreeFieldLabel: "",
+  //                 promo: promoLevelStamps,
+  //                 qty: arraySigns[i].LevelSignQuantity,
+  //                 defaultPromo: arraySigns[i].levelStamp.stamp.StampClientName,
+  //                 levelId: arraySigns[i].LevelID,
+  //                 ahead: this.state.currentAhead,
+  //                 stampId: arraySigns[i].levelStamp.StampId,
+  //                 completeSignObject: "",
+  //                 // promos: arraySigns[i].PromoLevelStamps.map((e) => {
+  //                 //   return { stampName: e.StampClientName, stampId: e.StampId };
+  //                 // })
+  //               };
+  //               for (let a = 0; a < arraySigns[i].SignFields.length; a++) {
+  //                 for (let c = 0; c < arrayLevelFields.length; c++) {
+  //                   if (
+  //                     arrayLevelFields[c].FieldId ===
+  //                     arraySigns[i].SignFields[a].FieldID
+  //                   ) {
+  //                     obj.completeSignObject = arraySigns[i].SignFields;
+  //                     //outer contents of items in list: example: header, description, brand
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 0) {
+  //                       obj.headerone =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headeroneFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headeroneFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 1) {
+  //                       obj.headertwo =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headertwoFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headertwoFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 2) {
+  //                       obj.headerthree =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headerthreeFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headerthreeFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                   }
+  //                 }
+  //               }
+  //               for (
+  //                 let z = 0;
+  //                 z < arraySigns[i].PromoLevelStamps.length;
+  //                 z++
+  //               ) {
+  //                 promoLevelStamps.push({
+  //                   stampName:
+  //                     arraySigns[i].PromoLevelStamps[z].StampClientName,
+  //                   stampId: arraySigns[i].PromoLevelStamps[z].StampId,
+  //                 });
+  //               }
+  //               arrGrid.push(obj);
+  //               setTimeout(() => {
+  //                 this.setState({ shouldNotify: false });
+  //               }, 2500);
+  //             }
+  //             // if (this.state.showMultiEdit === false) {
+  //             this.refs.refsHomeGrid.resetTextInput();
+  //             // }
+
+  //             this.setState(
+  //               {
+  //                 dataFromUser: resp,
+  //                 arrGrid: arrGrid,
+  //                 adFrom: resp.Model.StartDate.match(newDate)[0],
+  //                 adTo: resp.Model.EndDate.match(newDate)[0],
+  //                 // main_AheadInfoArray: resp.Model.AheadInfo,
+  //               },
+  //               () => {
+  //                 alert(JSON.stringify(arrGrid));
+  //                 if (!resp.Model.AheadInfo) {
+  //                   this.setState({ main_AheadInfoArray: getAhead() });
+  //                 } else if (resp.Model.AheadInfo[0] == null) {
+  //                   this.setState({ main_AheadInfoArray: getAhead() });
+  //                 } else {
+  //                   this.setState({
+  //                     main_AheadInfoArray: resp.Model.AheadInfo,
+  //                   });
+  //                 }
+  //                 this.setState({ trigger: false }, () => {
+  //                   if (idForScanner) {
+  //                     this.setState(
+  //                       { showScannedItems: false },
+  //                       () =>
+  //                         this.refs.refsHomeGrid.handleScanner(
+  //                           idForScanner,
+  //                           null,
+  //                           true
+  //                         ),
+  //                       () => {
+  //                         this.setState({ showScannedItems: true });
+  //                       }
+  //                     );
+  //                   }
+  //                 });
+  //               }
+  //             );
+  //           } else if (resp.Handling === "failed") {
+  //             this.setState({
+  //               notificationText: "network error",
+  //               shouldNotify: true,
+  //               pass: "",
+  //               isLoading: false,
+  //             });
+  //           } else if (resp === "network error") {
+  //             this.setState({
+  //               notificationText: "Network Error",
+  //               shouldNotify: true,
+  //               isLoading: false,
+  //             });
+  //           }
+  //         }
+  //       );
+  //     } else {
+  //       if (e === "deletedMultiple") {
+  //         this.setState({
+  //           shouldNotify: true,
+  //           notificationText: "Signs Deleted",
+  //         });
+  //         this.refs.refsHomeGrid.deleteFromArray(newArr);
+  //       }
+  //       if (e === "deleted") {
+  //         this.setState({
+  //           shouldNotify: true,
+  //           notificationText: "Sign Deleted",
+  //         });
+  //       }
+
+  //       //the api call body data is all stored in state, coming
+  //       //from other components
+  //       //for example, if you choose "Next Ad", that will send over
+  //       //the correct ahead type and trigger this post request
+  //       //and populate the grid and correct dates
+  //       const body = {
+  //         currentAhead: this.state.currentAhead,
+  //         currentLevelID: this.state.data.data.Model.LevelID,
+  //         currentSignTypeID: this.state.currentSignTypeID,
+  //         currentLevelTypeID: this.state.levelTypeID,
+  //         currentDepartmentID: this.state.currentDepartmentID,
+  //         batchTypeID:
+  //           this.state.searchText.length > 0
+  //             ? 0
+  //             : this.state.batchTypeID
+  //             ? this.state.batchTypeID
+  //             : 0,
+
+  //         searchValues:
+  //           this.state.batchTypeID.length < 1
+  //             ? this.state.isSearched === true
+  //               ? this.state.prevSearchedText
+  //               : this.state.searchText
+  //             : this.state.searchText,
+  //       };
+  //       setTimeout(() => {
+  //         if (
+  //           body.currentAhead != this.state.prevBody[0].currentAhead ||
+  //           body.currentLevelID != this.state.prevBody[0].currentLevelID ||
+  //           body.currentSignTypeID !=
+  //             this.state.prevBody[0].currentSignTypeID ||
+  //           body.currentLevelTypeID !=
+  //             this.state.prevBody[0].currentLevelTypeID ||
+  //           body.currentDepartmentID !=
+  //             this.state.prevBody[0].currentDepartmentID ||
+  //           body.batchTypeID != this.state.prevBody[0].batchTypeID
+  //         ) {
+  //           this.setState({ showScannedGrid: false, showScannedItems: false });
+  //           if (
+  //             this.state.showBatchEditScreen === false &&
+  //             this.state.showprintBatchScreen === false &&
+  //             this.state.showPrintScreen === false &&
+  //             this.state.showScannedGrid === true &&
+  //             this.state.showScannedItems === true
+  //           ) {
+  //             this.refs.refsHomeGrid.noScanner();
+  //           }
+  //         }
+  //       }, 50);
+  //       data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
+  //         (resp) => {
+  //           this.setState({
+  //             timeLoggedIn: new Date().getTime(),
+  //             prevBody: [body],
+  //             // main_AheadInfoArray: resp.Model.AheadInfo,
+  //             searchText: "",
+  //           });
+  //           if (!resp.Model.AheadInfo) {
+  //             this.setState({ main_AheadInfoArray: getAhead() });
+  //           } else if (resp.Model.AheadInfo[0] == null) {
+  //             this.setState({ main_AheadInfoArray: getAhead() });
+  //           } else {
+  //             this.setState({ main_AheadInfoArray: resp.Model.AheadInfo });
+  //           }
+  //           this.uncheckAll();
+
+  //           this.setState({
+  //             reload: false,
+  //             trigger: true,
+  //             showBatchEditScreenInitialScreen: false,
+  //           });
+  //           if (resp.Model.Signs.length < 1) {
+  //             this.setState({ isLoading: false });
+  //           }
+  //           if (resp.Handling === "success") {
+  //             // alert(resp.Model.Signs.length);
+  //             // for (let i = 0; i < 10; i++) {}
+  //             // let i = 0;
+  //             // let farr = [];
+  //             // while (i < resp.Model.Signs.length) {
+  //             //   farr.push(resp.Model.Signs[i].LevelSignID);
+  //             //   i += 1;
+  //             // }
+  //             // for (let i = 0; i < resp.Model.Signs.length; i++) {
+  //             //   farr.push(resp.Model.Signs[i].LevelSignID);
+  //             // }
+  //             // alert(JSON.stringify(farr));
+  //             // alert("BLEBLEBLEBLEBLEBLE");
+  //             // console.log(
+  //             //   resp.Model.Signs.map((e) => {
+  //             //     return e.LevelSignID;
+  //             //   })
+  //             // );
+  //             // for (let i = 0; i < resp.Model.Signs.length; i++) {
+  //             //   console.log(i);
+  //             // }
+  //             //this removes duplicates when searching items
+  //             // if (body.searchValues.length > 0) {
+  //             //   // const arr = resp.Model.Signs;
+  //             //   // for (let i = arr.length - 1; i > -1; i--) {
+  //             //   //   arr[i].LevelSigns.map((e, index) => {
+  //             //   //     if (e.LevelSignID === e.LevelSignID && i != index) {
+  //             //   //       arr.splice(i, 1);
+  //             //   //     }
+  //             //   //   });
+  //             //   // }
+  //             // }
+  //             let newDate = /([^T]+)/;
+  //             const arraySigns = resp.Model.Signs;
+  //             const arrayLevelFields = resp.Model.LevelFields;
+  //             const arrGrid = [];
+  //             const promoLevelStamps = [];
+
+  //             for (let i = 0; i < arraySigns.length; i++) {
+  //               const obj = {
+  //                 signLastUpdated: arraySigns[i].LevelSignLastUpdated,
+  //                 levelSignId: arraySigns[i].LevelSignID,
+  //                 id: arraySigns[i].SignID,
+  //                 headerone: "",
+  //                 headeroneFieldLabel: "",
+  //                 headertwo: "",
+  //                 headertwoFieldLabel: "",
+  //                 headerthree: "",
+  //                 headerthreeFieldLabel: "",
+  //                 promo: promoLevelStamps.slice(0, 3),
+  //                 qty: arraySigns[i].LevelSignQuantity,
+  //                 qtyDefault: arraySigns[i].sign.SignQuantity,
+  //                 // qtyDefault: 2,
+  //                 defaultPromo: arraySigns[i].levelStamp.StampClientName,
+  //                 // defaultPromo: ":DLKFJ:LSDKJF",
+  //                 levelId: arraySigns[i].LevelID,
+  //                 campaignId: arraySigns[i].CampaignID,
+  //                 ahead: this.state.currentAhead,
+  //                 levelSignStampId: arraySigns[i].StampID,
+  //                 stampId: arraySigns[i].levelStamp.StampId,
+  //                 // stampId: 234234,
+  //                 completeSignObject: "",
+  //                 promos: arraySigns[i].PromoLevelStamps.map((e) => {
+  //                   return {
+  //                     stampName: e.StampClientName,
+  //                     stampId: e.StampId,
+  //                     //below are for proofing the image
+  //                     campaignId: e.stamp.CampaignID,
+  //                     featureId: e.stamp.FeatureID,
+  //                     programId: e.stamp.ProgramID,
+  //                     planId: e.stamp.PlanID,
+  //                     sizeId: e.stamp.stock.SizeId,
+  //                     stockId: e.stamp.StockID,
+
+  //                     surname: this.state.surname,
+  //                     levelid: this.state.levelId,
+
+  //                     width: e.stamp.stock.stockSize.SizeWidth,
+  //                     height: e.stamp.stock.stockSize.SizeHeight,
+  //                   };
+  //                 }),
+  //                 // promos: ["a", "b"],
+  //               };
+
+  //               console.log("OBJ");
+
+  //               for (let a = 0; a < arraySigns[i].SignFields.length; a++) {
+  //                 //all signs showing here
+  //                 // console.log(7, " index ", a);
+  //                 for (let c = 0; c < arrayLevelFields.length; c++) {
+  //                   // console.log(8, " index2 ", c);
+  //                   if (
+  //                     arrayLevelFields[c].FieldId ===
+  //                     arraySigns[i].SignFields[a].FieldID
+  //                   ) {
+  //                     obj.completeSignObject = arraySigns[i].SignFields;
+
+  //                     //outer contents of items in list: example: header, description, brand
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 0) {
+  //                       // console.log(9);
+  //                       obj.headerone =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headeroneFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headeroneFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 1) {
+  //                       // console.log(10);
+  //                       obj.headertwo =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headertwoFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headertwoFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                     if (arrayLevelFields[c].LevelFieldOrder == 2) {
+  //                       // console.log(11);
+  //                       obj.headerthree =
+  //                         arraySigns[i].SignFields[a].SignFieldValue;
+  //                       obj.headerthreeFieldLabel =
+  //                         arrayLevelFields[c].FieldLabel;
+  //                       this.setState({
+  //                         headerthreeFieldLabel: arrayLevelFields[c].FieldLabel,
+  //                       });
+  //                     }
+  //                   }
+  //                 }
+  //               }
+  //               // for (let z = 0; z < arraySigns[i].PromoLevelStamps.length; z++) {
+  //               //   promoLevelStamps.push({
+  //               //     stampName: !body.batchTypeID
+  //               //       ? arraySigns[i].PromoLevelStamps[z].StampClientName
+  //               //       : arraySigns[i].PromoLevelStamps[z].StampClientName,
+  //               //     stampId: !body.batchTypeID
+  //               //       ? arraySigns[i].PromoLevelStamps[z].StampId
+  //               //       : arraySigns[i].PromoLevelStamps[z].stampId,
+  //               //   });
+  //               // }
+
+  //               arrGrid.push(obj);
+  //               // console.log(12);
+  //               setTimeout(() => {
+  //                 this.setState({ shouldNotify: false });
+  //               }, 2500);
+  //             }
+  //             this.setState({
+  //               promoLevelStamps: [...new Set(promoLevelStamps)],
+  //             });
+  //             // if (this.state.showMultiEdit === false) {
+  //             this.refs.refsHomeGrid.resetTextInput();
+  //             // }
+  //             this.setState(
+  //               {
+  //                 dataFromUser: resp,
+  //                 arrGrid: arrGrid,
+  //                 adFrom: resp.Model.StartDate.match(newDate)[0],
+  //                 adTo: resp.Model.EndDate.match(newDate)[0],
+  //                 // main_AheadInfoArray: resp.Model.AheadInfo,
+  //               },
+  //               () => {
+  //                 // console.log(999);
+  //                 // alert(JSON.stringify(arrGrid));
+  //                 if (!resp.Model.AheadInfo) {
+  //                   this.setState({ main_AheadInfoArray: getAhead() });
+  //                 } else if (resp.Model.AheadInfo[0] == null) {
+  //                   this.setState({ main_AheadInfoArray: getAhead() });
+  //                 } else {
+  //                   this.setState({
+  //                     main_AheadInfoArray: resp.Model.AheadInfo,
+  //                   });
+  //                 }
+  //                 this.setState({ trigger: false }, () => {
+  //                   if (idForScanner) {
+  //                     this.setState(
+  //                       { showScannedItems: false },
+  //                       () =>
+  //                         this.refs.refsHomeGrid.handleScanner(
+  //                           idForScanner,
+  //                           null,
+  //                           true
+  //                         ),
+  //                       () => {
+  //                         this.setState({ showScannedItems: true });
+  //                       }
+  //                     );
+  //                   }
+  //                 });
+  //               }
+  //             );
+  //           } else if (resp.Handling === "failed") {
+  //             this.setState({
+  //               notificationText: "network error",
+  //               shouldNotify: true,
+  //               pass: "",
+  //               isLoading: false,
+  //             });
+  //           } else if (resp === "network error") {
+  //             this.setState({
+  //               notificationText: "Network Error",
+  //               shouldNotify: true,
+  //               isLoading: false,
+  //             });
+  //           }
+  //         }
+  //       );
+  //     }
+  //     if (
+  //       this.state.showScannedItems === true &&
+  //       this.state.showScannedGrid === true
+  //     ) {
+  //       this.setState({ showScannedItems: false }, () =>
+  //         this.setState({ showScannedItems: true })
+  //       );
+  //     }
+  //     setTimeout(() => {
+  //       if (this.state.showprintBatchScreen === true) {
+  //         this.setState({ isLoading: false });
+  //       }
+  //     }, 200);
+  //   }
+  // };
 
   getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
+    //this gets hit right away
+    // make parsing efficient
     //update this.state.arrgrid
     if (isMultiEditFirstTime == true) {
       setCalled(false);
@@ -1111,6 +1762,7 @@ export default class Main extends Component {
                   // main_AheadInfoArray: resp.Model.AheadInfo,
                 },
                 () => {
+                  // alert(JSON.stringify(arrGrid));
                   if (!resp.Model.AheadInfo) {
                     this.setState({ main_AheadInfoArray: getAhead() });
                   } else if (resp.Model.AheadInfo[0] == null) {
@@ -1379,6 +2031,7 @@ export default class Main extends Component {
                   // main_AheadInfoArray: resp.Model.AheadInfo,
                 },
                 () => {
+                  // alert(JSON.stringify(arrGrid));
                   if (!resp.Model.AheadInfo) {
                     this.setState({ main_AheadInfoArray: getAhead() });
                   } else if (resp.Model.AheadInfo[0] == null) {
@@ -1441,8 +2094,13 @@ export default class Main extends Component {
   deleteMultipleHandlerArray = () => {
     this.setState({});
   };
-  showPrintScreen = () => {
-    this.refs.refsHomeGrid.showPrintScreen();
+  showPrintScreen = (e) => {
+    this.setState({ auditModeTest: e });
+    if (e === "auditMode") {
+      this.refs.refsHomeGrid.showPrintScreen(true, "auditMode");
+    } else {
+      this.refs.refsHomeGrid.showPrintScreen(e);
+    }
   };
   //checkbox toggle griddata ,allows checkbox in griddata to work
   homeHeader_EnableMultipleSelectFromGrid = (bool) => {
@@ -1541,13 +2199,17 @@ export default class Main extends Component {
     this.refs.refsHomeGrid.multiEditActivate();
   };
 
+  audit = (bool) => {
+    this.setState({ auditMode: bool });
+  };
+
   checkDate = (e) => {
     // var nameArr = names.split(',');
     //create comma seperated items in string
     let arr = this.state.arrGrid;
     let arr2 = JSON.parse(e);
     let newArr = [];
-    console.log(this.state.arrGrid[0], arr2[0]);
+    // console.log(this.state.arrGrid[0], arr2[0]);
     //this is comparing the login time vs the last time the signs were updated
     for (let i = 0; i < arr.length; i++) {
       for (let a = 0; a < arr2.length; a++) {
@@ -1562,7 +2224,7 @@ export default class Main extends Component {
     }
     let unique = [...new Set(newArr)];
     const bodyArr = unique.join(", ");
-    console.log("IS THIS THE RIGHT ONE MOFO", JSON.stringify(bodyArr));
+    // console.log("IS THIS THE RIGHT ONE MOFO", JSON.stringify(bodyArr));
     const body = {
       SignIDs: JSON.stringify(bodyArr),
     };
@@ -1669,6 +2331,8 @@ export default class Main extends Component {
                       style={[global.width100]}
                     >
                       <HomeHeader
+                        backToHome={this.backToHome}
+                        auditMode={this.state.auditMode}
                         multiEditActivate={this.multiEditActivate}
                         currentSignType={this.state.currentSignTypeID}
                         setSignType={(signType) => {
@@ -1837,6 +2501,9 @@ export default class Main extends Component {
                     >
                       {this.state.loadHome === true && (
                         <Home
+                          audit={this.audit}
+                          auditMode={this.state.auditMode}
+                          backToHome={this.backToHome}
                           checkDate={this.checkDate}
                           LevelUserInfoBuildBatch={
                             this.state.LevelUserInfoBuildBatch
@@ -1925,7 +2592,8 @@ export default class Main extends Component {
                 {!this.state.showprintBatchScreen &&
                   !this.state.showBatchEditScreen &&
                   !this.state.showOrderStockScreen &&
-                  this.state.currentSignTypeID != 8 && (
+                  this.state.currentSignTypeID != 8 &&
+                  this.state.auditMode === false && (
                     <View style={main.footer}>
                       <DepartmentsScrollView
                         showMultiEdit={this.state.showMultiEdit}

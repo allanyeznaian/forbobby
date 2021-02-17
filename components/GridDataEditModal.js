@@ -364,7 +364,6 @@ export default class GridDataEditModal extends Component {
           if (resp.Handling === "success") {
             //look
             const asdf = this.props.checkDate(bodyContents.jsonLocalSign);
-            alert(JSON.stringify(asdf));
 
             setTimeout(() => {
               if (

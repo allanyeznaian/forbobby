@@ -47,6 +47,8 @@ export default class GridData extends Component {
     super(props);
     this._isMounted = false;
     this.state = {
+      UPCText: "",
+      showExitScannedButton: false,
       multiEditTrigger: false,
       backgroundColor: "#ececec",
       dataForEditAndPromo: [],
@@ -99,11 +101,18 @@ export default class GridData extends Component {
     // }
   };
   showPrintScreen = (bool, e) => {
+    // alert(JSON.stringify(this.state.scannedArr));
+    // alert(JSON.stringify(e));
     if (e === "Published") {
       this.props.notify("Published");
       this.setState({ showPrintScreen: bool });
+    } else if (e === "auditMode") {
+      this.props.audit(bool);
+      this.setState({ showExitScannedButton: true });
+      // this.exitScanned();
+      this.setState({ auditMode: true });
     } else {
-      this.setState({ showPrintScreen: bool });
+      this.setState({ showPrintScreen: bool, auditMode: false });
     }
   };
 
@@ -327,8 +336,18 @@ export default class GridData extends Component {
 
   //checkbox method
   //this is the method that enables you to select/deselect multiple signs
-  selectAll = () => {
-    if (
+  selectAll = (e) => {
+    if (this.state.auditMode === true) {
+      setTimeout(() => {
+        const arr = [...this.state.scannedArr];
+        this.setState({
+          multipleSelectedHandlerArray: arr,
+          allArrSelected: true,
+        });
+        this.props.home_EnableDeleteSelected(arr);
+        this.reload();
+      }, 1000);
+    } else if (
       this.state.showScannedItems === true &&
       this.state.allArrSelected === false
     ) {
@@ -354,6 +373,9 @@ export default class GridData extends Component {
         allArrSelected: false,
       });
       this.reload();
+    }
+    if (e === "audit") {
+      this.showPrintScreen(true, "auditMode");
     }
   };
   multipleSelectedHandler = (id, bool, deleted) => {
@@ -432,10 +454,18 @@ export default class GridData extends Component {
       this.props.isLoading(false);
     }
   };
-  showScanner = () => {
-    this.setState({ showScanner: true });
+  showScanner = (bool, action) => {
+    if (bool === true || bool === false) {
+      this.setState({
+        showScanner: bool,
+        auditMode: action === "Audit" ? true : false,
+      });
+    } else {
+      this.setState({ showScanner: true, auditMode: false });
+    }
   };
   handleScanner = (data, bool, refreshBool) => {
+    this.setState({ textForBarcode: JSON.stringify(data) });
     if (this.state.scannedArr.length == "0" && !data) {
       this.props.showScannedGrid(false);
       this.props.showScannedItems(false);
@@ -461,6 +491,7 @@ export default class GridData extends Component {
             }
           }
         }
+
         this.setState({ showScanner: false });
       } else if (refreshBool === true) {
         const emptyArr = [];
@@ -490,6 +521,10 @@ export default class GridData extends Component {
         },
         () => {
           this.reloadData();
+          if (refreshBool === "auditMode") {
+            // const arr = [...this.state.scannedArr];
+            this.selectAll("audit");
+          }
         }
       );
     }
@@ -516,7 +551,7 @@ export default class GridData extends Component {
     this.props.showScannedItems(false);
     this.setState({ showScannedItems: false, scannedArr: [] });
   };
-  exitScanned = () => {
+  exitScanned = (action) => {
     setCalled(false);
     this.props.getCall();
     this.props.showScannedItems(false);
@@ -771,6 +806,17 @@ export default class GridData extends Component {
     </View>
   );
 
+  backToHome = () => {
+    this.setState(
+      { auditMode: false, showScanner: false, auditModeTest: "" },
+      () => {
+        this.props.backToHome();
+      }
+    );
+  };
+  onChangeText = (e) => {
+    this.setState({ UPCText: e });
+  };
   render() {
     // this if statement allows for the component to refresh
     if (this.props.home_Trigger === false) {
@@ -782,6 +828,20 @@ export default class GridData extends Component {
           {this.state.showScanner === true && (
             <Modal>
               <BarCodeScannerComponent
+                UPCText={this.state.UPCText}
+                onChangeText={this.onChangeText}
+                text={this.state.textForBarcode}
+                backToHome={this.backToHome}
+                auditModeFromProps={this.props.auditMode}
+                auditMode={
+                  this.state.auditMode === true
+                    ? true
+                    : this.state.auditModeTest === "auditMode"
+                    ? true
+                    : this.props.auditMode === true
+                    ? true
+                    : false
+                }
                 isForForm={false}
                 handleScanner={this.handleScanner}
                 mainData={this.props.home_Data}
@@ -834,8 +894,19 @@ export default class GridData extends Component {
                 </View>
               </React.Fragment>
             )}
+
           {this.state.showPrintScreen === true && (
             <PrintScreen
+              auditMode={
+                this.state.auditMode === true
+                  ? true
+                  : this.state.auditModeTest === "auditMode"
+                  ? true
+                  : this.props.auditMode === true
+                  ? true
+                  : false
+              }
+              scannedArr={this.state.scannedArr}
               LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}
               multiEditActivate={false}
               storedSigns={[]}
@@ -961,7 +1032,15 @@ export default class GridData extends Component {
                     functionality="button"
                     size={40}
                     source={require("../assets/vectoricons/barcodescanner.png")}
-                    onPress={() => this.showScanner()}
+                    onPress={() =>
+                      this.showScanner(
+                        this.state.auditModeTest === "auditModeTest"
+                          ? "Audit"
+                          : this.state.auditMode === true
+                          ? "Audit"
+                          : ""
+                      )
+                    }
                   />
                 </View>
               )}
@@ -1012,16 +1091,18 @@ export default class GridData extends Component {
                       <View style={global.row}></View>
                     </React.Fragment>
                   )}
-                {this.state.showScannedItems === true && (
-                  <TouchableOpacity
-                    style={[global.pangeaBlue]}
-                    onPress={() => this.exitScanned()}
-                  >
-                    <Text style={global.textWhiteCenter}>
-                      Exit scanned items list
-                    </Text>
-                  </TouchableOpacity>
-                )}
+                {this.state.showScannedItems === true &&
+                  this.state.auditMode != true &&
+                  this.state.showExitScannedButton === false && (
+                    <TouchableOpacity
+                      style={[global.pangeaBlue]}
+                      onPress={() => this.exitScanned()}
+                    >
+                      <Text style={global.textWhiteCenter}>
+                        Exit scanned items list
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 <SwipeListView
                   data={
                     this.state.showScannedItems === false
@@ -1033,8 +1114,8 @@ export default class GridData extends Component {
                   windowSize={10}
                   renderItem={this.renderItem}
                   renderHiddenItem={
-                    () => {}
-                    // !this.props.nonEditable ? this.renderHiddenItem : () => {}
+                    // () => {}
+                    !this.props.nonEditable ? this.renderHiddenItem : () => {}
                   }
                   leftOpenValue={this.state.width / 3}
                   rightOpenValue={-(this.state.width / 2)}

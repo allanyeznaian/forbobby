@@ -34,7 +34,8 @@ export default class Navbar extends Component {
     arr.sort((a, b) =>
       a.SignTypeID > b.SignTypeID ? 1 : b.SignTypeID > a.SignTypeID ? -1 : 0
     );
-    arr.splice(1, 0, { Sign: "Batch Edit", SignTypeID: "Batch Edit" });
+    arr.splice(1, 0, { Sign: "Audit", SignTypeID: "Audit" });
+    arr.splice(2, 0, { Sign: "Batch Edit", SignTypeID: "Batch Edit" });
     // if(this.props.LevelUserDefaultSignTypeID === 4){
 
     // }
@@ -94,58 +95,65 @@ export default class Navbar extends Component {
 
   select = (e) => {
     setCalled(false);
-    this.setState({ selected: e.Sign }, () => {
-      if (e.Sign === "Tag Batch" || e.Sign === "Sign Batch") {
-        this.setState({ printBatchIsExpanded: true });
-      } else if (e.Sign === "Tag Stock" || e.Sign === "Sign Stock") {
-        this.setState({ orderStockIsExpanded: true });
-      } else {
-        this.setState({
-          orderStockIsExpanded: false,
-          printBatchIsExpanded: false,
-        });
-      }
-
-      if (e.Sign !== "Print Batch" && e.Sign !== "Order Stock") {
-        if (e.Sign == "Promo" && e.SignTypeID == 1) {
-          this.props.main_promo();
+    this.setState(
+      { selected: e.Sign != "Audit" ? e.Sign : this.state.selected },
+      () => {
+        if (e.Sign === "Tag Batch" || e.Sign === "Sign Batch") {
+          this.setState({ printBatchIsExpanded: true });
+        } else if (e.Sign === "Tag Stock" || e.Sign === "Sign Stock") {
+          this.setState({ orderStockIsExpanded: true });
         } else {
-          this.props.main_Selected(
-            e.Sign === "Logout" ? this.props.main_Logout() : e.SignTypeID,
-            e.Sign === "Tag Batch"
-              ? this.setState(this.props.main_TagBatch("tagbatch", false))
-              : e.SignTypeID,
-            e.Sign === "Sign Batch"
-              ? this.setState(this.props.main_SignBatch("signbatch", false))
-              : e.SignTypeID,
-            e.Sign === "Batch Edit"
-              ? this.setState(this.props.main_TagBatch("batchedit"))
-              : e.SignTypeID,
-            e.Sign === "Tag Stock" ? this.props.main_TagStock() : e.SignTypeID,
-            e.Sign === "Sign Stock"
-              ? this.props.main_SignStock()
-              : e.SignTypeID,
-            e.Sign === "Multi Edit" ? this.props.main_MultiEdit() : e.SignTypeID
-          );
+          this.setState({
+            orderStockIsExpanded: false,
+            printBatchIsExpanded: false,
+          });
         }
 
-        if (this.state.showMenu === true) {
-          this.setState({ showMenu: false });
+        if (e.Sign !== "Print Batch" && e.Sign !== "Order Stock") {
+          if (e.Sign == "Promo" && e.SignTypeID == 1) {
+            this.props.main_promo();
+          } else {
+            this.props.main_Selected(
+              e.Sign === "Logout" ? this.props.main_Logout() : e.SignTypeID,
+              e.Sign === "Tag Batch"
+                ? this.setState(this.props.main_TagBatch("tagbatch", false))
+                : e.SignTypeID,
+              e.Sign === "Sign Batch"
+                ? this.setState(this.props.main_SignBatch("signbatch", false))
+                : e.SignTypeID,
+              e.Sign === "Batch Edit"
+                ? this.setState(this.props.main_TagBatch("batchedit"))
+                : e.SignTypeID,
+              e.Sign === "Tag Stock"
+                ? this.props.main_TagStock()
+                : e.SignTypeID,
+              e.Sign === "Sign Stock"
+                ? this.props.main_SignStock()
+                : e.SignTypeID,
+              e.Sign === "Multi Edit"
+                ? this.props.main_MultiEdit()
+                : e.SignTypeID
+            );
+          }
+
+          if (this.state.showMenu === true) {
+            this.setState({ showMenu: false });
+          }
+        }
+        if (e.Sign === "Print Batch") {
+          this.setState({
+            printBatchIsExpanded: !this.state.printBatchIsExpanded,
+            orderStockIsExpanded: false,
+          });
+        }
+        if (e.Sign === "Order Stock") {
+          this.setState({
+            orderStockIsExpanded: !this.state.orderStockIsExpanded,
+            printBatchIsExpanded: false,
+          });
         }
       }
-      if (e.Sign === "Print Batch") {
-        this.setState({
-          printBatchIsExpanded: !this.state.printBatchIsExpanded,
-          orderStockIsExpanded: false,
-        });
-      }
-      if (e.Sign === "Order Stock") {
-        this.setState({
-          orderStockIsExpanded: !this.state.orderStockIsExpanded,
-          printBatchIsExpanded: false,
-        });
-      }
-    });
+    );
   };
   render() {
     return (

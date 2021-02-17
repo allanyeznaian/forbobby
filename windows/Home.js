@@ -40,6 +40,9 @@ export default class Home extends Component {
       }
     }
   };
+  exitScanned = () => {
+    this.refs.child.exitScanned();
+  };
   resetPagination = () => {
     this.refs.child.resetPagination();
   };
@@ -47,13 +50,16 @@ export default class Home extends Component {
     this.refs.child.uncheckAll();
   };
   resetMultipleSelectedHandler = () => {};
-  showPrintScreen = () => {
-    this.refs.child.showPrintScreen(true);
+  showPrintScreen = (e) => {
+    this.refs.child.showPrintScreen(true, e);
   };
   resetTextInput = () => {
     this.refs.child.resetTextInput();
   };
   displayBatch = () => {};
+  showScanner = (bool, action) => {
+    this.refs.child.showScanner(bool, action);
+  };
   showScannedItems = (bool) => {
     this.props.showScannedItems(bool);
   };
@@ -78,6 +84,9 @@ export default class Home extends Component {
         <View style={[global.container]}>
           <View style={home.wrapper}>
             <GridData
+              auditMode={this.props.auditMode}
+              audit={this.props.audit}
+              backToHome={this.props.backToHome}
               checkDate={this.props.checkDate}
               LevelUserInfoBuildBatch={this.props.LevelUserInfoBuildBatch}
               nonEditable={this.props.nonEditable}

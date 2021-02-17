@@ -279,7 +279,8 @@ export default class PrintScreen extends Component {
           <Modal animationType="slide" visible={true}>
             {this.state.showPDF === false &&
               this.state.showNewModalForLinks === false &&
-              this.props.multiEditActivate === false && (
+              this.props.multiEditActivate === false &&
+              this.props.auditMode === false && (
                 <View
                   style={[
                     printScreen.headerCheckboxWrapper,
@@ -394,7 +395,8 @@ export default class PrintScreen extends Component {
                 <View style={[printScreen.background, global.row]}>
                   {/* <View> */}
                   {this.props.multiEditActivate === false &&
-                    this.state.selectedItems === true && (
+                    this.state.selectedItems === true &&
+                    this.props.auditMode === false && (
                       <Text
                         style={[
                           // printScreen.bold,
@@ -410,6 +412,8 @@ export default class PrintScreen extends Component {
                       {
                         width:
                           this.state.selectedItems === false
+                            ? "31%"
+                            : this.props.auditMode === true
                             ? "31%"
                             : !this.props.multiEditActivate
                             ? "29%"
@@ -428,6 +432,8 @@ export default class PrintScreen extends Component {
                       {
                         width:
                           this.state.selectedItems === false
+                            ? "31%"
+                            : this.props.auditMode === true
                             ? "31%"
                             : !this.props.multiEditActivate
                             ? "29%"
@@ -448,6 +454,8 @@ export default class PrintScreen extends Component {
                         width:
                           this.state.selectedItems === false
                             ? "31%"
+                            : this.props.auditMode === true
+                            ? "31%"
                             : !this.props.multiEditActivate
                             ? "29%"
                             : "31%",
@@ -466,53 +474,54 @@ export default class PrintScreen extends Component {
                         <View key={index} style={global.row}>
                           {e.ahead == this.props.ahead ? (
                             <React.Fragment>
-                              {this.props.multiEditActivate === false && (
-                                <TouchableOpacity
-                                  style={[
-                                    {
-                                      backgroundColor:
-                                        this.state.storeArr
-                                          .map((a) => {
-                                            return a.levelSignId;
-                                          })
-                                          .indexOf(e.levelSignId) > -1
-                                          ? "#d9ad34"
-                                          : "#3796ff",
-                                    },
-                                    printScreen.add,
-                                  ]}
-                                  disabled={
-                                    this.state.storeArr
-                                      .map((a) => {
-                                        return a.levelSignId;
-                                      })
-                                      .indexOf(e.levelSignId) > -1
-                                      ? true
-                                      : false
-                                  }
-                                  onPress={() => {
-                                    this.saveItems(e);
-                                  }}
-                                >
-                                  <Text
+                              {this.props.multiEditActivate === false &&
+                                this.props.auditMode === false && (
+                                  <TouchableOpacity
                                     style={[
-                                      printScreen.font20,
                                       {
-                                        color:
+                                        backgroundColor:
                                           this.state.storeArr
                                             .map((a) => {
                                               return a.levelSignId;
                                             })
                                             .indexOf(e.levelSignId) > -1
-                                            ? "grey"
-                                            : "white",
+                                            ? "#d9ad34"
+                                            : "#3796ff",
                                       },
+                                      printScreen.add,
                                     ]}
+                                    disabled={
+                                      this.state.storeArr
+                                        .map((a) => {
+                                          return a.levelSignId;
+                                        })
+                                        .indexOf(e.levelSignId) > -1
+                                        ? true
+                                        : false
+                                    }
+                                    onPress={() => {
+                                      this.saveItems(e);
+                                    }}
                                   >
-                                    +
-                                  </Text>
-                                </TouchableOpacity>
-                              )}
+                                    <Text
+                                      style={[
+                                        printScreen.font20,
+                                        {
+                                          color:
+                                            this.state.storeArr
+                                              .map((a) => {
+                                                return a.levelSignId;
+                                              })
+                                              .indexOf(e.levelSignId) > -1
+                                              ? "grey"
+                                              : "white",
+                                        },
+                                      ]}
+                                    >
+                                      +
+                                    </Text>
+                                  </TouchableOpacity>
+                                )}
                               {/* {this.props.multiEditActivate === false ?
                             
                           } */}
@@ -522,9 +531,11 @@ export default class PrintScreen extends Component {
                                 style={[
                                   printScreen.col2,
                                   {
-                                    width: !this.props.multiEditActivate
-                                      ? "29%"
-                                      : "31%",
+                                    width:
+                                      !this.props.multiEditActivate &&
+                                      this.props.auditMode === false
+                                        ? "29%"
+                                        : "31%",
                                   },
                                 ]}
                               >
@@ -539,9 +550,11 @@ export default class PrintScreen extends Component {
                                 style={[
                                   printScreen.col2,
                                   {
-                                    width: !this.props.multiEditActivate
-                                      ? "29%"
-                                      : "31%",
+                                    width:
+                                      !this.props.multiEditActivate &&
+                                      this.props.auditMode === false
+                                        ? "29%"
+                                        : "31%",
                                   },
                                 ]}
                               >
@@ -556,9 +569,11 @@ export default class PrintScreen extends Component {
                                 style={[
                                   printScreen.col2,
                                   {
-                                    width: !this.props.multiEditActivate
-                                      ? "29%"
-                                      : "31%",
+                                    width:
+                                      !this.props.multiEditActivate &&
+                                      this.props.auditMode === false
+                                        ? "29%"
+                                        : "31%",
                                   },
                                 ]}
                               >

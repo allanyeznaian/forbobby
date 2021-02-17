@@ -180,6 +180,11 @@ export const barCodeScanner = {
     color: "white",
     fontSize: 28,
   },
+  cancelTextAudit: {
+    fontWeight: "bold",
+    color: "white",
+    fontSize: 22,
+  },
   cancelWrapper: {
     backgroundColor: "transparent",
     padding: 30,
@@ -191,6 +196,20 @@ export const barCodeScanner = {
         Dimensions.get("window").width * 0.9 * 2) /
       2,
     marginTop: 45,
+    width: Dimensions.get("window").width,
+    height: "100%",
+  },
+  cancelWrapperAudit: {
+    backgroundColor: "transparent",
+    // padding: 30,
+    // paddingTop: 45,
+    // opacity: 1,
+    alignItems: "center",
+    marginBottom:
+      (Dimensions.get("screen").height -
+        Dimensions.get("window").width * 0.9 * 2) /
+      2,
+    marginTop: 15,
     width: Dimensions.get("window").width,
     height: "100%",
   },

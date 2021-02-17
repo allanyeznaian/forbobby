@@ -126,9 +126,9 @@ export default class Home extends Component {
   openDrawer = () => {
     this.props.openDrawer(true);
   };
-  print = () => {
+  print = (e) => {
     setCalled(false);
-    this.props.showPrintScreen();
+    this.props.showPrintScreen(e);
   };
   headerHeight = (e) => {
     this.props.headerHeight(e);
@@ -168,55 +168,117 @@ export default class Home extends Component {
             style={[global.row, global.subContainer, homeHeader.containerWidth]}
           >
             <View style={homeHeader.marg}>
-              <TouchableOpacity
-                onPress={() => this.openDrawer()}
-                underlayColor="none"
-                style={homeHeader.menuButton}
-                disabled={this.props.isLoadingrn === true ? true : false}
-              >
-                <Icon
-                  functionality="icon"
-                  size={44}
-                  source={require("../assets/vectoricons/menu.png")}
-                />
-              </TouchableOpacity>
-
-              <View style={[global.row, homeHeader.adToAndFrom]}>
-                <Text style={[global.bold, global.marginLeft15]}>
-                  {!this.props.batchEdit === true &&
-                  !this.props.printBatch === true &&
-                  this.props.currentSignType != 8
-                    ? "Ad From"
-                    : ""}
-                </Text>
-                <Text style={[global.bold, homeHeader.marginLeft30]}>
-                  {!this.props.batchEdit === true &&
-                  !this.props.printBatch === true &&
-                  this.props.currentSignType != 8
-                    ? "To"
-                    : ""}
-                </Text>
-              </View>
-              <View style={[global.row, homeHeader.adWrapperMargin]}>
-                <Text>
-                  {!this.props.batchEdit === true &&
-                  !this.props.printBatch === true &&
-                  this.props.currentSignType != 8
-                    ? this.props.main_AdFrom
-                    : ""}
-                </Text>
-                <Text style={[global.marginLeft15]}>
-                  {!this.props.batchEdit === true &&
-                  !this.props.printBatch === true &&
-                  this.props.currentSignType != 8
-                    ? this.props.main_AdTo
-                    : ""}
-                </Text>
-              </View>
+              {this.props.auditMode != true && (
+                <React.Fragment>
+                  <TouchableOpacity
+                    onPress={() => this.openDrawer()}
+                    underlayColor="none"
+                    style={homeHeader.menuButton}
+                    disabled={this.props.isLoadingrn === true ? true : false}
+                  >
+                    <Icon
+                      functionality="icon"
+                      size={44}
+                      source={require("../assets/vectoricons/menu.png")}
+                    />
+                  </TouchableOpacity>
+                  <View style={[global.row, homeHeader.adToAndFrom]}>
+                    <Text style={[global.bold, global.marginLeft15]}>
+                      {!this.props.batchEdit === true &&
+                      !this.props.printBatch === true &&
+                      this.props.currentSignType != 8 &&
+                      this.props.auditMode === false
+                        ? "Ad From"
+                        : ""}
+                    </Text>
+                    <Text style={[global.bold, homeHeader.marginLeft30]}>
+                      {!this.props.batchEdit === true &&
+                      !this.props.printBatch === true &&
+                      this.props.currentSignType != 8 &&
+                      this.props.auditMode === false
+                        ? "To"
+                        : ""}
+                    </Text>
+                  </View>
+                  <View style={[global.row, homeHeader.adWrapperMargin]}>
+                    <Text>
+                      {!this.props.batchEdit === true &&
+                      !this.props.printBatch === true &&
+                      this.props.currentSignType != 8 &&
+                      this.props.auditMode === false
+                        ? this.props.main_AdFrom
+                        : ""}
+                    </Text>
+                    <Text style={[global.marginLeft15]}>
+                      {!this.props.batchEdit === true &&
+                      !this.props.printBatch === true &&
+                      this.props.currentSignType != 8 &&
+                      this.props.auditMode === false
+                        ? this.props.main_AdTo
+                        : ""}
+                    </Text>
+                  </View>
+                </React.Fragment>
+              )}
             </View>
+            {this.props.auditMode === true && (
+              <View style={homeHeader.dropdownWrapper1}>
+                <CustomButton
+                  width="100%"
+                  alignContent="center"
+                  containerWidth="50%"
+                  marginLeft="auto"
+                  marginRight="auto"
+                  text="Back"
+                  backgroundColor="tomato"
+                  clicked={() =>
+                    Alert.alert(
+                      "Please Confirm",
+                      "Progress will be lost if you haven't saved",
+                      [
+                        { text: "Cancel", onPress: null },
+                        {
+                          text: "OK",
+                          onPress: () =>
+                            this.props.backToHome("goBackAllTheWay"),
+                        },
+                      ],
+                      { cancelable: true }
+                    )
+                  }
+                  disabled={false}
+                />
+                <CustomButton
+                  width="100%"
+                  alignContent="center"
+                  containerWidth="50%"
+                  marginLeft="auto"
+                  forPrint={
+                    this.props.isLoadingrn === true
+                      ? false
+                      : this.props.storedSignsLength != 0
+                      ? true
+                      : this.props.isDeleteEnabled === true
+                      ? true
+                      : false
+                  }
+                  marginRight="auto"
+                  text="Print"
+                  clicked={() => this.print("auditMode")}
+                  disabled={
+                    this.props.storedSignsLength != 0
+                      ? false
+                      : this.props.isDeleteEnabled === true
+                      ? false
+                      : true
+                  }
+                />
+              </View>
+            )}
             {!this.props.batchEdit === true &&
             this.props.currentSignType != 8 &&
-            !this.props.printBatch === true ? (
+            !this.props.printBatch === true &&
+            this.props.auditMode === false ? (
               <View style={homeHeader.dropdownWrapper1}>
                 <ModalDropdown
                   justForHeader={-22}
@@ -327,73 +389,77 @@ export default class Home extends Component {
               this.props.showPrintBatch === false && (
                 <View style={homeHeader.dropdownWrapper}>
                   <View style={homeHeader.cancelButton}>
-                    {this.props.showMultiEdit === false && (
+                    {this.props.showMultiEdit === false &&
+                      this.props.auditMode != true && (
+                        <CustomButton
+                          width="100%"
+                          alignContent="center"
+                          forDelete={this.props.isDeleteEnabled}
+                          marginLeft="auto"
+                          marginRight="auto"
+                          containerWidth="30%"
+                          text="Delete"
+                          clicked={() =>
+                            Alert.alert(
+                              "",
+                              "Permanently Delete Selected Signs?",
+                              [
+                                { text: "Cancel", onPress: null },
+                                {
+                                  text: "OK",
+                                  onPress: this.onDeleteSelectedClicked,
+                                },
+                              ],
+                              { cancelable: true }
+                            )
+                          }
+                          disabled={
+                            this.props.isDeleteEnabled === true ? false : true
+                          }
+                        />
+                      )}
+                    {this.props.auditMode != true && (
                       <CustomButton
                         width="100%"
                         alignContent="center"
-                        forDelete={this.props.isDeleteEnabled}
-                        marginLeft="auto"
-                        marginRight="auto"
                         containerWidth="30%"
-                        text="Delete"
-                        clicked={() =>
-                          Alert.alert(
-                            "",
-                            "Permanently Delete Selected Signs?",
-                            [
-                              { text: "Cancel", onPress: null },
-                              {
-                                text: "OK",
-                                onPress: this.onDeleteSelectedClicked,
-                              },
-                            ],
-                            { cancelable: true }
-                          )
-                        }
-                        disabled={
-                          this.props.isDeleteEnabled === true ? false : true
-                        }
+                        marginLeft="auto"
+                        forPrint={!this.props.isLoadingrn}
+                        marginRight="auto"
+                        text="Search"
+                        clicked={() => this.activateSearch(1)}
+                        disabled={this.props.isLoadingrn}
                       />
                     )}
 
-                    <CustomButton
-                      width="100%"
-                      alignContent="center"
-                      containerWidth="30%"
-                      marginLeft="auto"
-                      forPrint={!this.props.isLoadingrn}
-                      marginRight="auto"
-                      text="Search"
-                      clicked={() => this.activateSearch(1)}
-                      disabled={this.props.isLoadingrn}
-                    />
-                    {this.props.showMultiEdit === false && (
-                      <CustomButton
-                        width="100%"
-                        alignContent="center"
-                        containerWidth="30%"
-                        marginLeft="auto"
-                        forPrint={
-                          this.props.isLoadingrn === true
-                            ? false
-                            : this.props.storedSignsLength != 0
-                            ? true
-                            : this.props.isDeleteEnabled === true
-                            ? true
-                            : false
-                        }
-                        marginRight="auto"
-                        text="Print"
-                        clicked={() => this.print()}
-                        disabled={
-                          this.props.storedSignsLength != 0
-                            ? false
-                            : this.props.isDeleteEnabled === true
-                            ? false
-                            : true
-                        }
-                      />
-                    )}
+                    {this.props.showMultiEdit === false &&
+                      this.props.auditMode != true && (
+                        <CustomButton
+                          width="100%"
+                          alignContent="center"
+                          containerWidth="30%"
+                          marginLeft="auto"
+                          forPrint={
+                            this.props.isLoadingrn === true
+                              ? false
+                              : this.props.storedSignsLength != 0
+                              ? true
+                              : this.props.isDeleteEnabled === true
+                              ? true
+                              : false
+                          }
+                          marginRight="auto"
+                          text="Print"
+                          clicked={() => this.print()}
+                          disabled={
+                            this.props.storedSignsLength != 0
+                              ? false
+                              : this.props.isDeleteEnabled === true
+                              ? false
+                              : true
+                          }
+                        />
+                      )}
                     {this.props.showMultiEdit === true && (
                       <CustomButton
                         width="100%"
