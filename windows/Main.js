@@ -310,6 +310,7 @@ export default class Main extends Component {
 
   backToHome = (action) => {
     this.setState({ auditMode: false, auditModeTest: "" });
+    this.refs.refsHomeGrid.exitScanned();
     if (action === "goBackAllTheWay") {
       this.refs.refsHomeGrid.exitScanned();
       if (this.state.defaultSignTypeID === 1) {

@@ -22,10 +22,10 @@ import {
 // const URL_PREFIX = "http://signshare.com/";
 
 //LOCAL DEV
-// const URL_PREFIX = "http://pangeaprint.com/";
+const URL_PREFIX = "http://pangeaprint.com/";
 
 //MOBILE DEV
-const URL_PREFIX = "http://www.pangea-usa.com/";
+// const URL_PREFIX = "http://www.pangea-usa.com/";
 
 const headers = {
   Accept: "text/plain",

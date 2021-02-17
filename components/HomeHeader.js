@@ -146,6 +146,9 @@ export default class Home extends Component {
   multiEdit = () => {
     this.props.multiEditActivate();
   };
+  placeHol = () => {
+    this.props.backToHome("goBackAllTheWay");
+  };
   render() {
     return (
       <React.Fragment>
@@ -239,8 +242,7 @@ export default class Home extends Component {
                         { text: "Cancel", onPress: null },
                         {
                           text: "OK",
-                          onPress: () =>
-                            this.props.backToHome("goBackAllTheWay"),
+                          onPress: () => this.placeHol(),
                         },
                       ],
                       { cancelable: true }

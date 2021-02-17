@@ -47,7 +47,7 @@ export default class GridDataPromoQtyModal extends Component {
     let qtyArr = [];
     const qtyFromProps = this.props.LevelUserMaxQuantityPerStore;
     if (qtyFromProps > 0) {
-      for (let i = 0; i < qtyFromProps + 1; i++) {
+      for (let i = 1; i < qtyFromProps + 1; i++) {
         qtyArr.push(i);
       }
       this.setState({ qtyOptions: qtyArr });
@@ -55,7 +55,7 @@ export default class GridDataPromoQtyModal extends Component {
     qtyArr2ndSign = [];
     const qtyFromPropsFor2ndSign = this.props.LevelUserStoreMaxQuantityPerStore;
     if (qtyFromPropsFor2ndSign > 0) {
-      for (let i = 0; i < qtyFromPropsFor2ndSign + 1; i++) {
+      for (let i = 1; i < qtyFromPropsFor2ndSign + 1; i++) {
         qtyArr2ndSign.push(i);
       }
       this.setState({ qtyOptions2ndSign: qtyArr2ndSign });

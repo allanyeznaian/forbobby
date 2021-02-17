@@ -34,7 +34,7 @@ export default class Navbar extends Component {
     arr.sort((a, b) =>
       a.SignTypeID > b.SignTypeID ? 1 : b.SignTypeID > a.SignTypeID ? -1 : 0
     );
-    arr.splice(1, 0, { Sign: "Audit", SignTypeID: "Audit" });
+    // arr.splice(1, 0, { Sign: "Audit", SignTypeID: "Audit" });
     arr.splice(2, 0, { Sign: "Batch Edit", SignTypeID: "Batch Edit" });
     // if(this.props.LevelUserDefaultSignTypeID === 4){
 
@@ -96,7 +96,7 @@ export default class Navbar extends Component {
   select = (e) => {
     setCalled(false);
     this.setState(
-      { selected: e.Sign != "Audit" ? e.Sign : this.state.selected },
+      // { selected: e.Sign != "Audit" ? e.Sign : this.state.selected },
       () => {
         if (e.Sign === "Tag Batch" || e.Sign === "Sign Batch") {
           this.setState({ printBatchIsExpanded: true });

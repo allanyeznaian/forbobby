@@ -456,10 +456,9 @@ export default class GridData extends Component {
   };
   showScanner = (bool, action) => {
     if (bool === true || bool === false) {
-      this.setState({
-        showScanner: bool,
-        auditMode: action === "Audit" ? true : false,
-      });
+      this.setState({ auditMode: action === "Audit" ? true : false }, () =>
+        this.setState({ showScanner: true })
+      );
     } else {
       this.setState({ showScanner: true, auditMode: false });
     }
@@ -834,13 +833,14 @@ export default class GridData extends Component {
                 backToHome={this.backToHome}
                 auditModeFromProps={this.props.auditMode}
                 auditMode={
-                  this.state.auditMode === true
-                    ? true
-                    : this.state.auditModeTest === "auditMode"
-                    ? true
-                    : this.props.auditMode === true
-                    ? true
-                    : false
+                  true
+                  // this.state.auditMode === true
+                  //   ? true
+                  //   : this.state.auditModeTest === "auditMode"
+                  //   ? true
+                  //   : this.props.auditMode === true
+                  //   ? true
+                  //   : false
                 }
                 isForForm={false}
                 handleScanner={this.handleScanner}
@@ -1033,13 +1033,17 @@ export default class GridData extends Component {
                     size={40}
                     source={require("../assets/vectoricons/barcodescanner.png")}
                     onPress={() =>
-                      this.showScanner(
-                        this.state.auditModeTest === "auditModeTest"
-                          ? "Audit"
-                          : this.state.auditMode === true
-                          ? "Audit"
-                          : ""
-                      )
+                      this.setState({ auditMode: true }, () => {
+                        this.showScanner(
+                          "",
+                          // this.state.auditModeTest === "auditModeTest"
+                          //   ? "Audit"
+                          //   : this.state.auditMode === true
+                          // ?
+                          "Audit"
+                          // : ""
+                        );
+                      })
                     }
                   />
                 </View>
