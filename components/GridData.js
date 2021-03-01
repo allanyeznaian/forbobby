@@ -232,6 +232,7 @@ export default class GridData extends Component {
       multipleSelectedHandlerArray: [],
       allArrSelected: false,
     });
+    setMultipleSelectedHandlerArr([]);
     this.props.home_EnableDeleteSelected([]);
     this.reload();
   };
@@ -348,6 +349,7 @@ export default class GridData extends Component {
           multipleSelectedHandlerArray: arr,
           allArrSelected: true,
         });
+        setMultipleSelectedHandlerArr(arr);
         this.props.home_EnableDeleteSelected(arr);
         this.reload();
       }, 1000);
@@ -360,6 +362,7 @@ export default class GridData extends Component {
         multipleSelectedHandlerArray: arr,
         allArrSelected: true,
       });
+      setMultipleSelectedHandlerArr(arr);
       this.props.home_EnableDeleteSelected(arr);
       this.reload();
     } else if (this.state.allArrSelected === false) {
@@ -368,6 +371,7 @@ export default class GridData extends Component {
         multipleSelectedHandlerArray: arr,
         allArrSelected: true,
       });
+      setMultipleSelectedHandlerArr(arr);
       this.props.home_EnableDeleteSelected(arr);
       this.reload();
     } else if (this.state.allArrSelected === true) {
@@ -376,6 +380,7 @@ export default class GridData extends Component {
         multipleSelectedHandlerArray: [],
         allArrSelected: false,
       });
+      setMultipleSelectedHandlerArr([]);
       this.reload();
     }
     if (e === "audit") {

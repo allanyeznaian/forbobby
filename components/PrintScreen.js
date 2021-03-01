@@ -35,6 +35,7 @@ export default class PrintScreen extends Component {
       backgroundColor: "#ececec",
       data: [],
       batchName: "",
+      date: "",
       levelId: "",
       isLoading: false,
       showNewModalForLinks: false,
@@ -100,7 +101,23 @@ export default class PrintScreen extends Component {
     }
   };
   batchName = (e) => {
-    this.setState({ batchName: e });
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1;
+    var yyyy = today.getFullYear();
+    var hours = today.getHours();
+    var minutes = today.getMinutes();
+    var seconds = today.getSeconds();
+    var ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+    var strTime = hours + ":" + minutes + ":" + seconds + " " + ampm;
+    today = mm + "/" + dd + "/" + yyyy + " " + strTime;
+    this.setState({
+      batchName: e,
+      date: today,
+    });
   };
   clickHandler = (e) => {
     this.setState({ selected: e });
@@ -127,7 +144,7 @@ export default class PrintScreen extends Component {
     const obj = {
       buttonCall: e,
       LevelID: "",
-      batchName: this.state.batchName,
+      batchName: this.state.batchName + " " + this.state.date,
       levelSignsToPrint: null,
       batchTypeIDs: 0,
       LevelUserInfoID: this.props.levelUserInfoId,
@@ -689,10 +706,13 @@ export default class PrintScreen extends Component {
                             text: "print",
                             onPress: () => this.publishPrint("Print"),
                           },
-                          this.state.storeArr.length > 0 && {
-                            text: "Print saved items",
-                            onPress: () => this.publishPrint("Print", "stored"),
-                          },
+                          this.props.multiEditActivate === false &&
+                            this.props.auditMode === false &&
+                            this.state.storeArr.length > 0 && {
+                              text: "Print saved items",
+                              onPress: () =>
+                                this.publishPrint("Print", "stored"),
+                            },
                         ],
                         { cancelable: true }
                       )
@@ -727,11 +747,13 @@ export default class PrintScreen extends Component {
                             text: "publish",
                             onPress: () => this.publishPrint("Publish"),
                           },
-                          this.state.storeArr.length > 0 && {
-                            text: "Publish saved items",
-                            onPress: () =>
-                              this.publishPrint("Publish", "stored"),
-                          },
+                          this.state.storeArr.length > 0 &&
+                            this.props.multiEditActivate === false &&
+                            this.props.auditMode === false && {
+                              text: "Publish saved items",
+                              onPress: () =>
+                                this.publishPrint("Publish", "stored"),
+                            },
                         ],
                         { cancelable: true }
                       )
