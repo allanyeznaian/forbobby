@@ -96,7 +96,7 @@ export default class Navbar extends Component {
   select = (e) => {
     setCalled(false);
     this.setState(
-      // { selected: e.Sign != "Audit" ? e.Sign : this.state.selected },
+      { selected: e.Sign != "Audit" ? e.Sign : this.state.selected },
       () => {
         if (e.Sign === "Tag Batch" || e.Sign === "Sign Batch") {
           this.setState({ printBatchIsExpanded: true });

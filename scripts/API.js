@@ -22,10 +22,10 @@ import {
 // const URL_PREFIX = "http://signshare.com/";
 
 //LOCAL DEV
-const URL_PREFIX = "http://pangeaprint.com/";
+// const URL_PREFIX = "http://pangeaprint.com/";
 
 //MOBILE DEV
-// const URL_PREFIX = "http://www.pangea-usa.com/";
+const URL_PREFIX = "http://www.pangea-usa.com/";
 
 const headers = {
   Accept: "text/plain",
@@ -84,7 +84,7 @@ export async function data_get(
   showMultiEdit,
   action
 ) {
-  console.log("IN API PRE");
+  console.log(body);
   let state = {};
   const depObj = getDefaultDepartment();
   if (isMultiEditFirstTime === true) {
@@ -142,6 +142,7 @@ export async function data_get(
   ) {
     body = outerState.prevBody;
   }
+  // console.log("AFTER IFS ELSE");
   try {
     if (body.searchValues.length > 0 && isMultiEditFirstTime != true) {
       outerState.wasPrevSearched = true;
@@ -156,13 +157,17 @@ export async function data_get(
       }
     );
     let responseJson = await response.text();
+
+    // console.log("BEFORE PARSE REPLACE");
     var json = JSON.parse(responseJson.replace('{"d":null}', ""));
+    // console.log(json);
     if (json.Model.AheadInfo[0] == null) {
     } else {
       setAhead(json.Model.AheadInfo);
     }
     setMultiEditFirstTime(false);
     outerState.prevBody = body;
+
     return json;
   } catch (error) {
     var e = new Error("dummy");

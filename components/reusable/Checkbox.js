@@ -9,6 +9,7 @@
 
 import React, { Component } from "react";
 import { TouchableOpacity } from "react-native";
+import { getMultipleSelectedHandlerArr } from "../../App";
 import { checkbox } from "../../Styles/Styles";
 import Icon from "../reusable/Icon";
 
@@ -60,7 +61,7 @@ export default class Checkbox extends Component {
           disabled={this.state.disabled}
         >
           {this.props.selectAll === false &&
-          JSON.stringify(this.props.arr).includes(
+          JSON.stringify(getMultipleSelectedHandlerArr()).includes(
             JSON.stringify(this.props.id)
           ) === true ? (
             <Icon

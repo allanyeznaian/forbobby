@@ -102,18 +102,29 @@ export default class Home extends Component {
     });
   };
   dropdown_GetByAd = (selectedAd) => {
-    setCalled(false);
-    const num =
-      selectedAd == "Current Ad"
-        ? -1
-        : selectedAd == "Prior Ad"
-        ? -2
-        : selectedAd == "Next Ad"
-        ? 0
-        : selectedAd == "Kit Prep"
-        ? 1
-        : "";
-    this.props.main_SelectedAd(num);
+    if (
+      selectedAd === +-2 ||
+      selectedAd === +-1 ||
+      selectedAd === +0 ||
+      selectedAd === +1
+    ) {
+      setCalled(false);
+      this.setState({ backToHomeTrigger: true });
+    } else {
+      this.setState({ backToHomeTrigger: false });
+      setCalled(false);
+      const num =
+        selectedAd == "Current Ad"
+          ? -1
+          : selectedAd == "Prior Ad"
+          ? -2
+          : selectedAd == "Next Ad"
+          ? 0
+          : selectedAd == "Kit Prep"
+          ? 1
+          : "";
+      this.props.main_SelectedAd(num);
+    }
   };
   dropdownHandler = (e, aboveTrue) => {
     if (aboveTrue === "aboveTrue") {
@@ -289,13 +300,18 @@ export default class Home extends Component {
                     this.dropdown_GetByAd(this.props.main_AheadInfoArray[e]);
                   }}
                   defaultValue={
-                    this.props.main_AheadInfoArray[this.props.defaultSignTypeID]
+                    this.props.main_AheadInfoArray[
+                      this.state.backToHomeTrigger === true
+                        ? this.props.currentAhead + 2
+                        : this.props.defaultSignTypeID
+                    ]
                   }
                 />
               </View>
             ) : (
               this.state.batchEditAbove === true &&
-              this.props.showMultiEdit === false && (
+              this.props.showMultiEdit === false &&
+              this.props.auditMode === false && (
                 <View style={[global.column, global.marginAuto]}>
                   <Text style={global.bold}>
                     Batch: {JSON.stringify(this.props.isBatch)}
@@ -392,7 +408,8 @@ export default class Home extends Component {
                 <View style={homeHeader.dropdownWrapper}>
                   <View style={homeHeader.cancelButton}>
                     {this.props.showMultiEdit === false &&
-                      this.props.auditMode != true && (
+                      this.props.auditMode != true &&
+                      this.props.currentAhead != +-2 && (
                         <CustomButton
                           width="100%"
                           alignContent="center"

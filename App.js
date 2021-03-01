@@ -37,7 +37,15 @@ const state = {
   isCalled: false,
   multiEditFirstTime: false,
   errorArr: [],
+  multipleSelectedHandlerArray: [],
 };
+export const setMultipleSelectedHandlerArr = (e) => {
+  state.multipleSelectedHandlerArray = e;
+};
+export const getMultipleSelectedHandlerArr = () => {
+  return state.multipleSelectedHandlerArray;
+};
+
 export const addError = (e) => {
   state.errorArr.push(e);
 };

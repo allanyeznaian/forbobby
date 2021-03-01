@@ -30,17 +30,18 @@ import {
   TouchableHighlightBase,
 } from "react-native";
 import Icon from "./reusable/Icon";
+import ListSignGrid from "./reusable/ListSignGrid";
 import CustomTextInput from "./reusable/CustomTextInput";
 import GridDataEditModal from "./GridDataEditModal";
 import GridDataPromoQtyModal from "./GridDataPromoQtyModal";
 import Checkbox from "./reusable/Checkbox";
 import PrintScreen from "./PrintScreen";
 import { data_delete_sign } from "../scripts/API";
-import { SwipeListView } from "react-native-swipe-list-view";
+import { SwipeListView, SwipeRow } from "react-native-swipe-list-view";
 import TopBarNotification from "./reusable/TopBarNotification";
 import { gridData, global } from "../Styles/Styles";
 import BarCodeScannerComponent from "./reusable/BarCodeScanner";
-import { setCalled } from "../App";
+import { setCalled, setMultipleSelectedHandlerArr } from "../App";
 
 export default class GridData extends Component {
   constructor(props) {
@@ -263,6 +264,7 @@ export default class GridData extends Component {
           );
         })
         .map(function ({
+          key,
           id,
           levelSignId,
           headerone,
@@ -280,6 +282,7 @@ export default class GridData extends Component {
           signLastUpdated,
         }) {
           return {
+            key,
             id,
             levelSignId,
             headerone,
@@ -329,6 +332,7 @@ export default class GridData extends Component {
       }
     }, 10);
   };
+  // swipe, then based on index use
   resetTextInput = () => {
     this.filter("");
   };
@@ -401,6 +405,7 @@ export default class GridData extends Component {
     if (bool === true) {
       this.reload();
     }
+    setMultipleSelectedHandlerArr(arr);
     this.props.home_EnableDeleteSelected(arr);
   };
   //------------------------------
@@ -446,9 +451,10 @@ export default class GridData extends Component {
     if (data.item.levelSignId === arr[arr.length - 1].levelSignId) {
       this.props.isLoading(false);
     }
+    // console.log(arr.length);
     //loading issue when you press exit scanned
   };
-  layoutMandatory = () => {
+  layoutMandatory = (aaa) => {
     this.props.isLoading(false);
     if (this.props.nonEditable === true) {
       this.props.isLoading(false);
@@ -527,6 +533,10 @@ export default class GridData extends Component {
         }
       );
     }
+    this.setState({ UPCText: "" });
+  };
+  UPCReset = () => {
+    this.setState({ UPCText: "" });
   };
   noScanner = () => {
     this.setState({
@@ -573,6 +583,13 @@ export default class GridData extends Component {
           this.setState({ scannedArr: arr });
         }
       }
+    } else if (this.state.auditMode === true) {
+      this.setState({
+        showScannedItems: false,
+        scannedArr: [],
+        auditMode: false,
+      });
+      this.props.backToHome("goBackAllTheWay");
     } else {
       this.setState({ showScannedItems: false, scannedArr: [] });
     }
@@ -609,7 +626,7 @@ export default class GridData extends Component {
     // this.props.loading(false),
     <View
       onLayout={(event) => {
-        this.layoutMandatory();
+        this.layoutMandatory(data);
       }}
       key={rowKey}
       style={[
@@ -677,7 +694,7 @@ export default class GridData extends Component {
     </View>
   );
 
-  //renders the items behind the row ~ delete, edit, and promo
+  // renders the items behind the row ~ delete, edit, and promo
   renderHiddenItem = (data, rowKey) => (
     <View
       onLayout={(event) => {
@@ -739,10 +756,22 @@ export default class GridData extends Component {
           onPress={() =>
             Alert.alert(
               "",
-              "Remove Scanned Item" +
-                " " +
-                JSON.stringify(data.item.headerone) +
-                "?",
+              "Remove Scanned Item" + " " + data.item.headerone.length > 0
+                ? "Remove Scanned Item" +
+                    " " +
+                    JSON.stringify(data.item.headerone) +
+                    "?"
+                : data.item.headertwo.length > 0
+                ? "Remove Scanned Item" +
+                  " " +
+                  JSON.stringify(data.item.headertwo) +
+                  "?"
+                : data.item.headerthree.length > 0
+                ? "Remove Scanned Item" +
+                  " " +
+                  JSON.stringify(data.item.headerthree) +
+                  "?"
+                : +"item" + "?",
               [
                 { text: "Cancel", onPress: null },
                 {
@@ -827,6 +856,7 @@ export default class GridData extends Component {
           {this.state.showScanner === true && (
             <Modal>
               <BarCodeScannerComponent
+                UPCReset={this.UPCReset}
                 UPCText={this.state.UPCText}
                 onChangeText={this.onChangeText}
                 text={this.state.textForBarcode}
@@ -1107,6 +1137,79 @@ export default class GridData extends Component {
                       </Text>
                     </TouchableOpacity>
                   )}
+                {/* <Text> */}
+                {/* {
+                  this.state.showScannedItems === false
+                    ? this.state.arrayChunks[this.state.chunkIndex]
+                    : this.state.isFilteringScanned === true
+                    ? this.state.filteredArr
+                    : this.state.scannedArr.map((e) => {
+                        return <Text>{e.id}</Text>;
+                      })
+                  // .map((e, index) => {
+                  //     return (
+                  //       <SwipeRow
+                  //         // key={index}
+                  //         renderItem={
+                  //           <View>
+                  //             <Text>{JSON.stringify(e)}</Text>
+                  //           </View>
+                  //         }
+                  //         renderHiddenItem={
+                  //           <View>
+                  //             <TouchableOpacity
+                  //               style={{ backgroundColor: "blue" }}
+                  //               onPress={() => {}}
+                  //             />
+                  //           </View>
+                  //         }
+                  //       />
+                  //     );
+                  // }
+                  // )
+                } */}
+                {/* </Text> */}
+                {/* <SwipeListView
+                  data={
+                    this.state.showScannedItems === false
+                      ? this.state.arrayChunks[this.state.chunkIndex]
+                      : this.state.isFilteringScanned === true
+                      ? this.state.filteredArr
+                      : this.state.scannedArr
+                  }
+                  windowSize={10}
+                  renderItem={this.renderItem}
+                  renderHiddenItem={
+                    !this.props.nonEditable ? this.renderHiddenItem : () => {}
+                  }
+                  leftOpenValue={
+                    this.props.auditMode === true
+                      ? this.state.width / 3
+                      : this.props.ahead === -2
+                      ? 0.1
+                      : this.props.home_EnableDeleteSelected === false
+                      ? 0.1
+                      : this.state.width / 3
+                  }
+                  rightOpenValue={-this.state.width / 2}
+                  stopLeftSwipe={
+                    this.props.auditMode === true
+                      ? this.state.width / 3
+                      : this.props.ahead === -2
+                      ? 0.1
+                      : this.props.home_EnableDeleteSelected === false
+                      ? 0.1
+                      : this.state.width / 3
+                  }
+                  friction={80}
+                  stopRightSwipe={-this.state.width / 2}
+                  keyExtractor={(data, rowKey) => JSON.stringify(rowKey + 1)}
+                  scrollEnabled={true}
+                  showsVerticalScrollIndicator={true}
+                  swipeToOpenVelocityContribution={76}
+                  closeOnScroll={false}
+                  closeOnRowPress={false}
+                /> */}
                 <SwipeListView
                   data={
                     this.state.showScannedItems === false
@@ -1118,20 +1221,47 @@ export default class GridData extends Component {
                   windowSize={10}
                   renderItem={this.renderItem}
                   renderHiddenItem={
-                    // () => {}
                     !this.props.nonEditable ? this.renderHiddenItem : () => {}
                   }
-                  leftOpenValue={this.state.width / 3}
-                  rightOpenValue={-(this.state.width / 2)}
-                  stopLeftSwipe={this.state.width / 3}
+                  leftOpenValue={
+                    this.props.auditMode === true
+                      ? this.state.width / 3
+                      : this.props.ahead === -2
+                      ? 0.1
+                      : this.props.home_EnableDeleteSelected === false
+                      ? 0.1
+                      : this.state.width / 3
+                  }
+                  rightOpenValue={-this.state.width / 2}
+                  stopLeftSwipe={
+                    this.props.auditMode === true
+                      ? this.state.width / 3
+                      : this.props.ahead === -2
+                      ? 0.1
+                      : this.props.home_EnableDeleteSelected === false
+                      ? 0.1
+                      : this.state.width / 3
+                  }
+                  friction={80}
                   stopRightSwipe={-this.state.width / 2}
-                  keyExtractor={(data, rowKey) => JSON.stringify(rowKey + 1)}
+                  // keyExtractor={(data, rowKey) => JSON.stringify(rowKey + 1)}
                   scrollEnabled={true}
                   showsVerticalScrollIndicator={true}
                   swipeToOpenVelocityContribution={76}
                   closeOnScroll={false}
                   closeOnRowPress={false}
                 />
+                <View></View>
+
+                {/* <Basic
+                  data={
+                    this.state.showScannedItems === false
+                      ? this.state.arrayChunks[this.state.chunkIndex]
+                      : this.state.isFilteringScanned === true
+                      ? this.state.filteredArr
+                      : this.state.scannedArr
+                  }
+                /> */}
               </React.Fragment>
             )}
           </ScrollView>

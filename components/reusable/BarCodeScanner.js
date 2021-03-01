@@ -59,18 +59,19 @@ export default function App(props) {
     );
 
     state.item = true;
+    props.UPCReset();
   };
   continueAddingItem = (data) => {
     setScanned(false);
     props.handleScanner(data, "continue");
     state.item = true;
+    props.UPCReset();
   };
 
   const handleBarCodeScanned = ({ type, data }, e) => {
     if (props.UPCText.length > 0 && e === "fromSearch") {
       data = props.UPCText;
     }
-    console.log(props.UPCText, e);
     setScanned(true);
     setTimeout(() => {
       if (props.isForForm === true) {
@@ -98,6 +99,7 @@ export default function App(props) {
           state.response != "Barcode already scanned" &&
           props.auditMode != true
         ) {
+          //look
           state.response = "Sign does not exist";
         } else if (
           state.response != "add" &&
@@ -105,6 +107,7 @@ export default function App(props) {
           props.auditMode === true
         ) {
           state.response = "Good";
+          props.UPCReset();
         }
         if (state.response === "add" && !props.auditMode) {
           state.response = "asdf";
