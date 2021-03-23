@@ -43,6 +43,9 @@ export default class DepartmentsScrollView extends Component {
   clickHandlerFromRef = (e) => {
     this.clickHandler(e);
   };
+  departmentSelectNoCall = (e) => {
+    this.setState({ selected: e });
+  };
   clickHandler = (e) => {
     this.setState({ selected: e.DepartmentName }, () => {
       // if (this.props.showMultiEdit === false) {

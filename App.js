@@ -39,6 +39,17 @@ const state = {
   errorArr: [],
   multipleSelectedHandlerArray: [],
 };
+export const resetLogout = () => {
+  state.keepItemArraySign = [];
+  state.keepItemArrayTag = [];
+  state.defaultDepartment = "";
+  state.aheadInfoArr = [];
+  state.isCalled = false;
+  state.multiEditFirstTime = false;
+  state.errorArr = [];
+  state.multipleSelectedHandlerArray = [];
+};
+
 export const setMultipleSelectedHandlerArr = (e) => {
   state.multipleSelectedHandlerArray = e;
 };

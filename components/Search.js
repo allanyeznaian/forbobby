@@ -21,7 +21,6 @@ export default class Search extends Component {
     };
   }
 
-  componentDidMount = () => {};
   handleScanner = (bool) => {
     this.setState({ showScanner: bool, scanned: false });
   };

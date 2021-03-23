@@ -84,7 +84,6 @@ export async function data_get(
   showMultiEdit,
   action
 ) {
-  console.log(body);
   let state = {};
   const depObj = getDefaultDepartment();
   if (isMultiEditFirstTime === true) {
@@ -142,12 +141,15 @@ export async function data_get(
   ) {
     body = outerState.prevBody;
   }
-  // console.log("AFTER IFS ELSE");
   try {
+    if (body.currentDepartmentID.DepartmentID != undefined) {
+      body.currentDepartmentID = body.currentDepartmentID.DepartmentID;
+    }
     if (body.searchValues.length > 0 && isMultiEditFirstTime != true) {
       outerState.wasPrevSearched = true;
       state = body;
     }
+    console.log(body, action);
     let response = await fetch(
       URL_PREFIX + "controls/mobileservice.asmx/LoadSignsByUserandBucket",
       {
@@ -157,10 +159,7 @@ export async function data_get(
       }
     );
     let responseJson = await response.text();
-
-    // console.log("BEFORE PARSE REPLACE");
     var json = JSON.parse(responseJson.replace('{"d":null}', ""));
-    // console.log(json);
     if (json.Model.AheadInfo[0] == null) {
     } else {
       setAhead(json.Model.AheadInfo);
@@ -214,10 +213,6 @@ export async function data_get(
 //     );
 //     let responseJson = await response.text();
 //     var json = JSON.parse(responseJson.replace('{"d":null}', ""));
-//     // console.log(json);
-//     // console.log(
-//     //   "BLAHBLAH:LDKJHF:LDKJF:LKDJF:LKSDJF:LSDKJF:OIEJF:OIWEJP:OWEIJ:FLKXJ><XJF:LSKDJF:OILJFEOIPFJOIWEIJFPOWEIJFSODIJF>?SLDKJFPQAOEGJHAS{PDOFHUJ}ASPOFHFGVBNM"
-//     // );
 //     return json;
 //   } catch (error) {
 //     var e = new Error("dummy");

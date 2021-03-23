@@ -83,12 +83,13 @@ export default class PrintScreen extends Component {
 
   //this is wired to the X button of each item on this list
   delete = (e, bool) => {
+    // console.log(JSON.stringify(e));
     this.props.delete(e, bool);
     const arr = [...this.state.data];
     const arr2 = array(this.props.currentSignTypeID);
     this.setState({ storeArr: arr2 });
     var index = arr.findIndex(function (o) {
-      return o.levelSignId === e.levelSignId;
+      return o.levelSignId === e;
     });
     if (index !== -1) arr.splice(index, 1);
     this.setState({ data: arr });
@@ -129,6 +130,7 @@ export default class PrintScreen extends Component {
     this.setState({ url: "", showPDF: false, isLoading: false });
   };
   saveItems = (e) => {
+    console.log(e);
     this.props.keepItems([e], "ADD_ITEM", this.props.currentSignTypeID);
     const arr2 = array(this.props.currentSignTypeID);
     this.setState({ storeArr: arr2 });
@@ -606,7 +608,9 @@ export default class PrintScreen extends Component {
                                     size={20}
                                     disabled={this.state.isLoading}
                                     functionality="button"
-                                    onPress={() => this.delete(e, true)}
+                                    onPress={() =>
+                                      this.delete(e.levelSignId, true)
+                                    }
                                     style={printScreen.closebuttonWidth}
                                     source={require("../assets/vectoricons/closered.png")}
                                   />

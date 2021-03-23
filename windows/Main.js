@@ -50,12 +50,14 @@ import {
   getAhead,
   getCalled,
   setCalled,
+  resetLogout,
 } from "../App";
 console.disableYellowBox = true;
 export default class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      backToHome: false,
       auditModeTest: "",
       arrayLevelFields: [],
       firstLoginTag: false,
@@ -307,38 +309,65 @@ export default class Main extends Component {
   };
   componentDidUpdate = () => {
     // this.resetTimer();
+    // if(this.state == )
+  };
+  shouldComponentUpdate = (e) => {
+    return e;
   };
 
   backToHome = (action) => {
-    this.setState({ auditMode: false, auditModeTest: "" });
-    this.refs.refsHomeGrid.exitScanned();
+    this.setState({
+      auditMode: false,
+      auditModeTest: "",
+      backToHome: true,
+    });
     if (action === "goBackAllTheWay") {
-      this.refs.header.dropdown_GetByAd(
-        this.props.currentAhead === +-1
+      this.refs.refsHomeGrid.exitScanned("fromedit");
+      console.log(1);
+      this.getCall("fromedit");
+      if (
+        !this.state.showprintBatchScreen &&
+        !this.state.showBatchEditScreen &&
+        !this.state.showOrderStockScreen &&
+        this.state.currentSignTypeID != 8 &&
+        this.state.auditMode === false
+      ) {
+        this.departmentSelectNoCall(this.state.currentDepartmentID);
+      }
+      this.setState({
+        arrGrid: [],
+        backToHome: false,
+        // defaultSignTypeID: this.state.currentAhead,
+      });
+      this.refs.header.dropdown_GetByAd_noCall(
+        this.state.currentAhead === +-1
           ? "Current Ad"
-          : this.props.currentAhead === +-2
+          : this.state.currentAhead === +-2
           ? "Prior Ad"
-          : this.props.currentAhead === +0
+          : this.state.currentAhead === +0
           ? "Next Ad"
-          : this.props.currentAhead === +1
+          : this.state.currentAhead === +1
           ? "Kit Prep"
           : -1
       );
-      this.refs.refsHomeGrid.exitScanned();
-      if (this.state.defaultSignTypeID === 1) {
-        this.refs.child.select({
-          Sign: "Promo",
-          SignTypeID: 1,
-        });
-      } else if (this.state.defaultSignTypeID === 8) {
-        this.setState({ firstLoginTag: true }, () => {
-          this.refs.child.select({
-            Sign: "Batch Edit",
-            SignTypeID: "Batch Edit",
-          });
-        });
-      }
+
+      // // this.refs.refsHomeGrid.exitScanned();
+      // if (this.state.defaultSignTypeID === 1) {
+      //   this.refs.child.select({
+      //     Sign: "Promo",
+      //     SignTypeID: 1,
+      //   });
+      // } else if (this.state.defaultSignTypeID === 8) {
+      //   this.setState({ firstLoginTag: true }, () => {
+      //     this.refs.child.select({
+      //       Sign: "Batch Edit",
+      //       SignTypeID: "Batch Edit",
+      //     });
+      //   });
+      // }
     }
+
+    this.setState({ backToHome: false });
   };
 
   //timeout method
@@ -362,24 +391,34 @@ export default class Main extends Component {
       const { navigate } = this.props.navigation;
       navigate("Login");
     }
+    resetLogout();
   };
 
   main_Ahead = (e) => {
     this.setState({ currentAhead: e, isLoading: true }, () => {
       if (this.state.showMultiEdit === true) {
         this.getCallFilter(true);
+        console.log(11);
         this.setState({ isLoading: false });
       } else {
         this.getCallFilter();
+        console.log(22);
       }
     });
   };
 
   //footer method
   departmentsScrollView_Department = (e) => {
+    // alert(
+    //   this.state.currentDepartmentID + JSON.stringify(this.state.backToHome)
+    // );
+    if (this.state.backToHome === true) {
+      this.departmentSelectNoCall(this.state.currentDepartmentID);
+    }
     this.setState(
       {
-        currentDepartmentID: e,
+        currentDepartmentID:
+          this.state.backToHome === true ? this.state.currentDepartmentID : e,
         isLoading: true,
         searchText: "",
         prevSearchedText: "",
@@ -395,6 +434,15 @@ export default class Main extends Component {
     );
   };
   departmentSelectNoCall = (e) => {
+    const arr = [...this.state.departments];
+    let departmentName = "";
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].DepartmentID === e) {
+        departmentName = arr[i].department.DepartmentName;
+        break;
+      }
+    }
+    this.refs.depRef.departmentSelectNoCall(departmentName);
     this.setState({ currentDepartmentID: e });
   };
 
@@ -518,10 +566,14 @@ export default class Main extends Component {
   };
   //this method handles the sliding navbar buttons
   navbar_promo = () => {
+    let defDepName = "";
+    if (getDefaultDepartment().department.DepartmentName.length > 0) {
+      defDepName = getDefaultDepartment().department;
+    }
     this.setState(
       {
         prevSearchedText: "",
-        currentDepartmentID: getDefaultDepartment(),
+        currentDepartmentID: getDefaultDepartment().department.DepartmentID,
         currentSignTypeID: 1,
         main_AheadInfoArray: getAhead(),
         nonEditable: false,
@@ -541,13 +593,16 @@ export default class Main extends Component {
       },
       () => {
         this.enableDeleteSelected([]);
+        this.refs.depRef.departmentSelectNoCall(
+          getDefaultDepartment().department.DepartmentName
+        );
         this.getCall();
         // this.getCallFilter();
       }
     );
   };
   navbar_SignType = (e, a, c) => {
-    this.setState({ prevSearchedText: "" });
+    this.setState({ prevSearchedText: "", batchTypeID: "" });
     if (e != "Audit") {
       this.setState({ auditMode: false });
     }
@@ -791,6 +846,7 @@ export default class Main extends Component {
         () => {
           this.enableDeleteSelected([]);
           this.getCallFilter();
+          console.log(55);
         }
       );
     } else {
@@ -814,6 +870,7 @@ export default class Main extends Component {
         () => {
           this.enableDeleteSelected([]);
           this.getCallFilter();
+          console.log(66);
         }
       );
       if (this.state.loadHome === true) {
@@ -874,8 +931,10 @@ export default class Main extends Component {
           // if (getCalled() === false) {
           if (b === true) {
             this.getCall("", [], "", true);
+            console.log(3);
           } else {
             this.getCall();
+            console.log(4);
           }
           this.setState({ getCallTester: false });
           // }
@@ -896,6 +955,7 @@ export default class Main extends Component {
     this.setState({ batchTypeID: batchTypeID, searchText: "" });
     setTimeout(() => {
       this.getCallFilter();
+      console.log(77);
     }, 10);
   };
   hideFilterGlitch = (bool) => {
@@ -913,6 +973,9 @@ export default class Main extends Component {
   // }
 
   getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
+    if (this.state.backToHome == true) {
+      e = "fromedit";
+    }
     let headeroneFieldLabel = "";
     let headertwoFieldLabel = "";
     let headerthreeFieldLabel = "";
@@ -1036,6 +1099,7 @@ export default class Main extends Component {
           }
         }, 50);
         //this is the actual api call
+
         data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
           (resp) => {
             this.setState({
@@ -1108,34 +1172,59 @@ export default class Main extends Component {
                       arraySigns[i].SignFields[a].FieldID
                     ) {
                       obj.completeSignObject = arraySigns[i].SignFields;
+                      // obj.completeFieldObject = arrayLevelFields
                       //outer contents of items in list: example: header, description, brand
-                      if (arrayLevelFields[c].LevelFieldOrder == 0) {
+
+                      if (arrayLevelFields[c].LevelFieldOrder === +0) {
+                        let a1 = arrayLevelFields[c].FieldLabel;
+                        obj.headeroneFieldLabel = a1;
+                        headeroneFieldLabel = a1;
                         obj.headerone =
                           arraySigns[i].SignFields[a].SignFieldValue;
-                        obj.headeroneFieldLabel =
-                          arrayLevelFields[c].FieldLabel;
-                        this.setState({
-                          headeroneFieldLabel: arrayLevelFields[c].FieldLabel,
-                        });
-                      }
-                      if (arrayLevelFields[c].LevelFieldOrder == 1) {
+                      } else if (arrayLevelFields[c].LevelFieldOrder === +1) {
+                        let a2 = arrayLevelFields[c].FieldLabel;
+                        obj.headertwoFieldLabel = a2;
+                        headertwoFieldLabel = a2;
                         obj.headertwo =
                           arraySigns[i].SignFields[a].SignFieldValue;
-                        obj.headertwoFieldLabel =
-                          arrayLevelFields[c].FieldLabel;
-                        this.setState({
-                          headertwoFieldLabel: arrayLevelFields[c].FieldLabel,
-                        });
-                      }
-                      if (arrayLevelFields[c].LevelFieldOrder == 2) {
+                      } else if (arrayLevelFields[c].LevelFieldOrder === +2) {
+                        let a3 = arrayLevelFields[c].FieldLabel;
+                        obj.headerthreeFieldLabel = a3;
+                        headerthreeFieldLabel = a3;
                         obj.headerthree =
                           arraySigns[i].SignFields[a].SignFieldValue;
-                        obj.headerthreeFieldLabel =
-                          arrayLevelFields[c].FieldLabel;
-                        this.setState({
-                          headerthreeFieldLabel: arrayLevelFields[c].FieldLabel,
-                        });
+                      } else {
+                        break;
                       }
+                      // obj.completeSignObject = arraySigns[i].SignFields;
+                      // //outer contents of items in list: example: header, description, brand
+                      // if (arrayLevelFields[c].LevelFieldOrder == 0) {
+                      //   obj.headerone =
+                      //     arraySigns[i].SignFields[a].SignFieldValue;
+                      //   obj.headeroneFieldLabel =
+                      //     arrayLevelFields[c].FieldLabel;
+                      //   this.setState({
+                      //     headeroneFieldLabel: arrayLevelFields[c].FieldLabel,
+                      //   });
+                      // }
+                      // if (arrayLevelFields[c].LevelFieldOrder == 1) {
+                      //   obj.headertwo =
+                      //     arraySigns[i].SignFields[a].SignFieldValue;
+                      //   obj.headertwoFieldLabel =
+                      //     arrayLevelFields[c].FieldLabel;
+                      //   this.setState({
+                      //     headertwoFieldLabel: arrayLevelFields[c].FieldLabel,
+                      //   });
+                      // }
+                      // if (arrayLevelFields[c].LevelFieldOrder == 2) {
+                      //   obj.headerthree =
+                      //     arraySigns[i].SignFields[a].SignFieldValue;
+                      //   obj.headerthreeFieldLabel =
+                      //     arrayLevelFields[c].FieldLabel;
+                      //   this.setState({
+                      //     headerthreeFieldLabel: arrayLevelFields[c].FieldLabel,
+                      //   });
+                      // }
                     }
                   }
                 }
@@ -1151,9 +1240,9 @@ export default class Main extends Component {
                   });
                 }
                 arrGrid.push(obj);
-                setTimeout(() => {
-                  this.setState({ shouldNotify: false });
-                }, 2500);
+                // setTimeout(() => {
+                //   this.setState({ shouldNotify: false });
+                // }, 2500);
               }
               // if (this.state.showMultiEdit === false) {
               this.refs.refsHomeGrid.resetTextInput();
@@ -1461,9 +1550,9 @@ export default class Main extends Component {
                 // }
 
                 arrGrid.push(obj);
-                setTimeout(() => {
-                  this.setState({ shouldNotify: false });
-                }, 2500);
+                // setTimeout(() => {
+                //   this.setState({ shouldNotify: false });
+                // }, 2500);
               }
               this.setState({
                 promoLevelStamps: [...new Set(promoLevelStamps)],
@@ -2194,6 +2283,7 @@ export default class Main extends Component {
   activateSearch = (signType) => {
     this.setState({
       showSearchPrompt: true,
+      batchTypeID: "",
       currentSignTypeID:
         this.state.showMultiEdit === true
           ? this.state.currentSignTypeID
@@ -2204,8 +2294,12 @@ export default class Main extends Component {
     this.setState({ showSearchPrompt: false });
   };
   search = (e) => {
+    if (this.state.batchTypeID == 0 || this.state.batchTypeID.length < 1) {
+      this.refs.header.resetBatchHeader();
+    }
     if (e.length > 1) {
-      let str = e.replace(/\s/g, "");
+      let strz = e.replace(/\s*,\s*/g, ",");
+      let str = strz.replace(/\,*,\,*/g, ",");
       this.setState(
         {
           searchText: str,
@@ -2216,6 +2310,7 @@ export default class Main extends Component {
         },
         () => {
           this.getCallFilter();
+          console.log(88);
         }
       );
     } else {
@@ -2250,22 +2345,17 @@ export default class Main extends Component {
     let arr = this.state.arrGrid;
     let arr2 = JSON.parse(e);
     let newArr = [];
-    // console.log(this.state.arrGrid[0], arr2[0]);
     //this is comparing the login time vs the last time the signs were updated
     for (let i = 0; i < arr.length; i++) {
       for (let a = 0; a < arr2.length; a++) {
         if (arr2[a].SignID === arr[i].id) {
-          //   if (new Date(arr[i].signLastUpdated) > this.state.timeLoggedIn) {
-          //     alert("DKLFNK:LDFK:LJKLD:K:LDSKLF");
           newArr.push(arr2[a].SignID);
-          // }
           break;
         }
       }
     }
     let unique = [...new Set(newArr)];
     const bodyArr = unique.join(", ");
-    // console.log("IS THIS THE RIGHT ONE MOFO", JSON.stringify(bodyArr));
     const body = {
       SignIDs: JSON.stringify(bodyArr),
     };
@@ -2273,14 +2363,6 @@ export default class Main extends Component {
     data_check_date({ SignIDs: bodyArr }).then((resp) => {
       if (resp.Handling === "success") {
         for (let i = 0; i < resp.Model.length; i++) {
-          console.log(
-            new Date(resp.Model[i].SignLastUpdated).getTime() >
-              new Date(this.state.timeLoggedIn).getTime(),
-            "     first number is bigger ?",
-            new Date(resp.Model[i].SignLastUpdated).getTime(),
-            "    vs ",
-            new Date(this.state.timeLoggedIn).getTime()
-          );
           if (resp.Model[i].signLastUpdated > this.state.timeLoggedIn) {
             // this.getCall("fromedit");
             // alert("DO THE CALL");
@@ -2617,6 +2699,7 @@ export default class Main extends Component {
                           isSearchedOriginally={this.state.isSearchedOriginally}
                           // level={this.state.level}
                           level={this.state.level}
+                          surName={this.state.surname}
                         />
                       )}
                     </View>

@@ -101,6 +101,9 @@ export default class Home extends Component {
       }
     });
   };
+  dropdown_GetByAd_noCall = (selectedAd) => {
+    this.setState({ selectedAd: selectedAd });
+  };
   dropdown_GetByAd = (selectedAd) => {
     if (
       selectedAd === +-2 ||
@@ -158,6 +161,7 @@ export default class Home extends Component {
     this.props.multiEditActivate();
   };
   placeHol = () => {
+    this.setState({ backToHomeTrigger: true });
     this.props.backToHome("goBackAllTheWay");
   };
   render() {
@@ -508,7 +512,7 @@ export default class Home extends Component {
                   </View>
                 </View>
               )}
-          {this.props.batchEdit && (
+          {this.props.batchEdit && this.props.auditMode != true && (
             <View style={homeHeader.dropdownWrapper}>
               <View style={homeHeader.cancelButton}>
                 {this.props.showMultiEdit === false && (

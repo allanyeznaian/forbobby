@@ -69,9 +69,12 @@ export default function App(props) {
   };
 
   const handleBarCodeScanned = ({ type, data }, e) => {
-    if (props.UPCText.length > 0 && e === "fromSearch") {
-      data = props.UPCText;
+    if (props.UPCText != undefined) {
+      if (props.UPCText.length > 0 && e === "fromSearch") {
+        data = props.UPCText;
+      }
     }
+
     setScanned(true);
     setTimeout(() => {
       if (props.isForForm === true) {

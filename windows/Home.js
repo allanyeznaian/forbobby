@@ -40,8 +40,8 @@ export default class Home extends Component {
       }
     }
   };
-  exitScanned = () => {
-    this.refs.child.exitScanned();
+  exitScanned = (e) => {
+    this.refs.child.exitScanned(e);
   };
   resetPagination = () => {
     this.refs.child.resetPagination();
@@ -148,6 +148,7 @@ export default class Home extends Component {
               refreshBatchEdit={this.props.refreshBatchEdit}
               setSearched={this.props.setSearched}
               isSearchedOriginally={this.props.isSearchedOriginally}
+              surName={this.props.surName}
             />
           </View>
         </View>

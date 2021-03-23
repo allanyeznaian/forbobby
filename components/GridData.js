@@ -87,6 +87,7 @@ export default class GridData extends Component {
       manageStore: false,
       multiEditActivate: false,
     };
+    this.oldState = {};
     this.refsArray = [];
     this.prevOpenedRow;
   }
@@ -102,8 +103,6 @@ export default class GridData extends Component {
     // }
   };
   showPrintScreen = (bool, e) => {
-    // alert(JSON.stringify(this.state.scannedArr));
-    // alert(JSON.stringify(e));
     if (e === "Published") {
       this.props.notify("Published");
       this.setState({ showPrintScreen: bool });
@@ -343,16 +342,16 @@ export default class GridData extends Component {
   //this is the method that enables you to select/deselect multiple signs
   selectAll = (e) => {
     if (this.state.auditMode === true) {
-      setTimeout(() => {
-        const arr = [...this.state.scannedArr];
-        this.setState({
-          multipleSelectedHandlerArray: arr,
-          allArrSelected: true,
-        });
-        setMultipleSelectedHandlerArr(arr);
-        this.props.home_EnableDeleteSelected(arr);
-        this.reload();
-      }, 1000);
+      // setTimeout(() => {
+      const arr = [...this.state.scannedArr];
+      this.setState({
+        multipleSelectedHandlerArray: arr,
+        allArrSelected: true,
+      });
+      setMultipleSelectedHandlerArr(arr);
+      this.props.home_EnableDeleteSelected(arr);
+      this.reload();
+      // }, 1000);
     } else if (
       this.state.showScannedItems === true &&
       this.state.allArrSelected === false
@@ -388,10 +387,15 @@ export default class GridData extends Component {
     }
   };
   multipleSelectedHandler = (id, bool, deleted) => {
+    // alert(id);
     const arr = [...this.state.multipleSelectedHandlerArray];
     const newArr = [];
     var index = arr.findIndex(function (o) {
-      return o.levelSignId === id.levelSignId;
+      if (id.levelSignId == undefined) {
+        return o.levelSignId === id;
+      } else {
+        return o.levelSignId === id.levelSignId;
+      }
     });
     if (index !== -1) arr.splice(index, 1);
     else {
@@ -405,8 +409,8 @@ export default class GridData extends Component {
     this.setState({
       multipleSelectedHandlerArray: arr,
     });
-    if (deleted === true) {
-    }
+    // if (deleted === true) {
+    // }
     if (bool === true) {
       this.reload();
     }
@@ -456,8 +460,6 @@ export default class GridData extends Component {
     if (data.item.levelSignId === arr[arr.length - 1].levelSignId) {
       this.props.isLoading(false);
     }
-    // console.log(arr.length);
-    //loading issue when you press exit scanned
   };
   layoutMandatory = (aaa) => {
     this.props.isLoading(false);
@@ -524,9 +526,16 @@ export default class GridData extends Component {
       } else {
         this.props.showScannedItems(false);
       }
+      const arrayChunks = [].concat.apply(
+        [],
+        unique.map(function (elem, i) {
+          return i % 10 ? [] : [unique.slice(i, i + 10)];
+        })
+      );
       this.setState(
         {
           scannedArr: unique,
+          arrayChunks: arrayChunks,
           showScannedItems: unique.length > 0 ? true : false,
         },
         () => {
@@ -567,25 +576,42 @@ export default class GridData extends Component {
   };
   exitScanned = (action) => {
     setCalled(false);
-    this.props.getCall();
+    if (action === "fromedit") {
+    } else {
+      this.props.getCall();
+    }
     this.props.showScannedItems(false);
     this.setState({
       exiting: true,
       showScannedItems: false,
       scannedArr: [],
       isFilteringScanned: false,
-      filteredArr: this.props.home_Data,
-      arr: this.props.home_Data,
+      filteredArr: action == "fromedit" ? [] : this.props.home_Data,
+      arr: action == "fromedit" ? [] : this.props.home_Data,
     });
-    this.reload();
+    if (action != "fromedit") {
+      this.reload();
+    }
+    // this.reload();
   };
   removeScannedItemFromArray = (e) => {
     const arr = [...this.state.scannedArr];
+    const arrChunk = [...this.state.arrayChunks[this.state.chunkIndex]];
+    console.log(
+      arrChunk.map((a, index) => {
+        return a.levelSignId === e;
+      })
+    );
+    // arrChunk.map((a, index) => {
+    //   a.levelSignId === e && arrChunk.splice(index, 1);
+    // });
     if (arr.length > 1) {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i].levelSignId === e) {
           arr.splice(i, 1);
-          this.setState({ scannedArr: arr });
+          this.setState({ scannedArr: arr }, () => {
+            this.handleScanner(this.state.textForBarcode);
+          });
         }
       }
     } else if (this.state.auditMode === true) {
@@ -868,6 +894,7 @@ export default class GridData extends Component {
                 backToHome={this.backToHome}
                 auditModeFromProps={this.props.auditMode}
                 auditMode={
+                  // this.props.surName === "pst" ? true : false
                   true
                   // this.state.auditMode === true
                   //   ? true
@@ -1089,47 +1116,47 @@ export default class GridData extends Component {
           <ScrollView style={gridData.scrollView} nestedScrollEnabled={true}>
             {this.state.reloadCheckbox === false && (
               <React.Fragment>
-                {this.state.arrayChunks.length > 1 &&
-                  !this.state.showScannedItems && (
-                    <React.Fragment>
-                      <View style={[global.row, global.marginAuto]}>
-                        <TouchableOpacity
-                          style={gridData.iconWrapper}
-                          onPress={() => {
-                            this.state.chunkIndex > 0
-                              ? this.loadMore("back")
-                              : {};
-                          }}
-                          disabled={this.props.disabled}
-                        >
-                          <Icon
-                            functionality="icon"
-                            size={22}
-                            source={require("../assets/vectoricons/rewind.png")}
-                          />
-                        </TouchableOpacity>
-                        <Text>
-                          {this.state.chunkIndex + 1} of{" "}
-                          {this.state.arrayChunks.length}
-                          {"  "}
-                        </Text>
-                        <TouchableOpacity
-                          style={gridData.iconWrapper}
-                          onPress={() => {
-                            this.loadMore("forward");
-                          }}
-                          disabled={this.props.disabled}
-                        >
-                          <Icon
-                            functionality="icon"
-                            size={22}
-                            source={require("../assets/vectoricons/forward.png")}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      <View style={global.row}></View>
-                    </React.Fragment>
-                  )}
+                {this.state.arrayChunks.length > 1 && (
+                  // !this.state.showScannedItems &&
+                  <React.Fragment>
+                    <View style={[global.row, global.marginAuto]}>
+                      <TouchableOpacity
+                        style={gridData.iconWrapper}
+                        onPress={() => {
+                          this.state.chunkIndex > 0
+                            ? this.loadMore("back")
+                            : {};
+                        }}
+                        disabled={this.props.disabled}
+                      >
+                        <Icon
+                          functionality="icon"
+                          size={22}
+                          source={require("../assets/vectoricons/rewind.png")}
+                        />
+                      </TouchableOpacity>
+                      <Text>
+                        {this.state.chunkIndex + 1} of{" "}
+                        {this.state.arrayChunks.length}
+                        {"  "}
+                      </Text>
+                      <TouchableOpacity
+                        style={gridData.iconWrapper}
+                        onPress={() => {
+                          this.loadMore("forward");
+                        }}
+                        disabled={this.props.disabled}
+                      >
+                        <Icon
+                          functionality="icon"
+                          size={22}
+                          source={require("../assets/vectoricons/forward.png")}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={global.row}></View>
+                  </React.Fragment>
+                )}
                 {this.state.showScannedItems === true &&
                   this.state.auditMode != true &&
                   this.state.showExitScannedButton === false && (
@@ -1221,9 +1248,10 @@ export default class GridData extends Component {
                       ? this.state.arrayChunks[this.state.chunkIndex]
                       : this.state.isFilteringScanned === true
                       ? this.state.filteredArr
-                      : this.state.scannedArr
+                      : this.state.arrayChunks[this.state.chunkIndex]
+                    // this.state.scannedArr
                   }
-                  windowSize={10}
+                  // windowSize={10}
                   renderItem={this.renderItem}
                   renderHiddenItem={
                     !this.props.nonEditable ? this.renderHiddenItem : () => {}
