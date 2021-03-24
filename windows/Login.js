@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 //You need to import anything here to be able to use it down below, find <CustomTextInput as an example
 
-import { Image, View, Text, Modal } from "react-native";
+import { Image, View, Text, Modal, TouchableOpacity } from "react-native";
 import { users_post } from "../scripts/API";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import CustomButton from "../components/reusable/CustomButton";
@@ -41,6 +41,7 @@ export default class Login extends Component {
       // pass: "hobart",
       // user: "mds3011",
       // pass: "eauclaire",
+      showInitialScreen: true,
       notificationText: "",
       showPass: false,
       shouldNotify: false,
@@ -65,7 +66,7 @@ export default class Login extends Component {
       };
     }
   }
-
+  componentDidMount = () => {};
   passwordBox = (e) => {
     this.setState({ width: e * 0.8 });
   };
@@ -159,6 +160,10 @@ export default class Login extends Component {
     null;
   };
 
+  signInToSignShare = () => {
+    this.setState({ showInitialScreen: false });
+  };
+
   render() {
     return (
       <View style={login.container}>
@@ -177,81 +182,132 @@ export default class Login extends Component {
           style={login.logo}
           source={require("../assets/images/Pangea_Logo.png")}
         />
-        <CustomTextInput
-          // this is how text inputs work
-          // value is where the string is stored
-          validate={true}
-          value={this.state.user}
-          placeholder="Username"
-          // onChangeText should set the same state as value, in this case, this.user(e) is called
-          // everytime a key is entered and e is the key that's entered
-          onChangeText={(e) => this.user(e)}
-        />
-        <View
-          style={global.row}
-          onLayout={(event) => {
-            this.passwordBox(event.nativeEvent.layout.width);
-          }}
-        >
-          {/* Custom Text input component works just like a regular TextInput component
-          but with some functionality included. */}
-          <CustomTextInput
-            editable={this.state.isLoading === true ? false : true}
-            validate={true}
-            placeholder="Password"
-            value={this.state.pass}
-            onChangeText={(e) => this.pass(e)}
-            secureTextEntry={!this.state.showPass === true ? true : false}
-          />
-          <View style={[global.absolute]}>
-            <View style={[login.absoluteChild, { left: this.state.width }]}>
-              {this.state.showPass === true ? (
-                <Icon
-                  functionality="button"
-                  size={36}
-                  onPress={() => this.setState({ showPass: false })}
-                  source={require("../assets/vectoricons/showPass.png")}
+        {this.state.showInitialScreen === true ? (
+          <Modal transparent={true} animationType="fade" visible={true}>
+            <Image
+              style={login.backgroundImage}
+              source={require("../assets/images/fruits-veggies.jpg")}
+            />
+            <View style={login.filter}>
+              <View style={[login.initialScreenSubWrapper, global.marginAuto]}>
+                <CustomButton
+                  width="100%"
+                  text="Sign in to SignShare"
+                  clicked={this.signInToSignShare}
                 />
-              ) : (
-                <Icon
-                  functionality="button"
-                  size={36}
-                  opacity={0.4}
-                  onPress={() => this.setState({ showPass: true })}
-                  source={require("../assets/vectoricons/hidePass.png")}
-                />
-              )}
+                <View style={login.space} />
+                <TouchableOpacity style={login.microsoftButton}>
+                  <Image
+                    style={login.microsoftIcon}
+                    source={require("../assets/images/microsoft.png")}
+                  />
+                  <View style={global.marginAuto}>
+                    <Text style={login.microsoftButtonText}>
+                      Sign in with Microsoft
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </View>
+          </Modal>
+        ) : (
+          <React.Fragment>
+            <CustomTextInput
+              // this is how text inputs work
+              // value is where the string is stored
+              validate={true}
+              value={this.state.user}
+              placeholder="Username"
+              // onChangeText should set the same state as value, in this case, this.user(e) is called
+              // everytime a key is entered and e is the key that's entered
+              onChangeText={(e) => this.user(e)}
+            />
+            <View
+              style={global.row}
+              onLayout={(event) => {
+                this.passwordBox(event.nativeEvent.layout.width);
+              }}
+            >
+              {/* Custom Text input component works just like a regular TextInput component
+          but with some functionality included. */}
+              <CustomTextInput
+                editable={this.state.isLoading === true ? false : true}
+                validate={true}
+                placeholder="Password"
+                value={this.state.pass}
+                onChangeText={(e) => this.pass(e)}
+                secureTextEntry={!this.state.showPass === true ? true : false}
+              />
+              <View style={[global.absolute]}>
+                <View style={[login.absoluteChild, { left: this.state.width }]}>
+                  {this.state.showPass === true ? (
+                    <Icon
+                      functionality="button"
+                      size={36}
+                      onPress={() => this.setState({ showPass: false })}
+                      source={require("../assets/vectoricons/showPass.png")}
+                    />
+                  ) : (
+                    <Icon
+                      functionality="button"
+                      size={36}
+                      opacity={0.4}
+                      onPress={() => this.setState({ showPass: true })}
+                      source={require("../assets/vectoricons/hidePass.png")}
+                    />
+                  )}
+                </View>
+              </View>
+            </View>
 
-        <View style={login.forgotPWWrapper}>
-          {/* this is one way to make html link style buttons */}
-          <TouchableHighlight
-            disabled={this.state.isLoading === true ? true : false}
-            onPress={() => this.forgotPassword()}
-          >
-            <Text style={login.forgotPWText}>Forgot Password?</Text>
-          </TouchableHighlight>
-          {/* end button */}
-        </View>
-        {/* this is a custom button, you can find more details in the CustomButton.js file */}
-        <CustomButton
-          disabled={
-            this.state.isLoading === true
-              ? true
-              : this.state.pass.length * this.state.user.length > 0
-              ? this.state.pass.length > 1
-                ? false
-                : true
-              : true
-          }
-          text="Login"
-          clicked={() => this.onLoginClicked()}
-          backgroundColor={
-            this.state.isLoading === true ? "lightgrey" : "#3796ff"
-          }
-        />
+            <View style={login.forgotPWWrapper}>
+              {/* this is one way to make html link style buttons */}
+              <TouchableHighlight
+                disabled={this.state.isLoading === true ? true : false}
+                onPress={() => this.forgotPassword()}
+              >
+                <Text style={login.forgotPWText}>Forgot Password?</Text>
+              </TouchableHighlight>
+              {/* end button */}
+            </View>
+            {/* this is a custom button, you can find more details in the CustomButton.js file */}
+            <CustomButton
+              disabled={
+                this.state.isLoading === true
+                  ? true
+                  : this.state.pass.length * this.state.user.length > 0
+                  ? this.state.pass.length > 1
+                    ? false
+                    : true
+                  : true
+              }
+              text="Login"
+              clicked={() => this.onLoginClicked()}
+              backgroundColor={
+                this.state.isLoading === true ? "lightgrey" : "#3796ff"
+              }
+            />
+            <View style={login.space} />
+            <CustomButton
+              disabled={
+                this.state.isLoading === true
+                  ? true
+                  : this.state.pass.length * this.state.user.length > 0
+                  ? this.state.pass.length > 1
+                    ? false
+                    : true
+                  : true
+              }
+              text="Cancel"
+              clicked={() => {
+                this.setState({ showInitialScreen: true });
+              }}
+              backgroundColor={
+                this.state.isLoading === true ? "lightgrey" : "tomato"
+              }
+            />
+          </React.Fragment>
+        )}
       </View>
     );
   }

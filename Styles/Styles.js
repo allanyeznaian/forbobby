@@ -713,31 +713,14 @@ export const loadingSpinner = {
 };
 
 export const login = {
-  eye: {
-    justifyContent: "flex-end",
-  },
-  forgotPWText: {
-    color: "#3796ff",
-    textDecorationLine: "underline",
-  },
-  forgotPWWrapper: {
-    marginBottom: 10,
-    left: 85,
-  },
   absoluteChild: {
     // left: 283,
     top: 18,
   },
-  text: {
-    textAlign: "center",
+  backgroundImage: {
+    position: "absolute",
     width: "100%",
-    fontWeight: "bold",
-    color: "white",
-  },
-  logo: {
-    marginTop: 25,
-    marginBottom: 25,
-    resizeMode: "stretch",
+    bottom: 0,
   },
   container: {
     marginTop: 35,
@@ -747,6 +730,60 @@ export const login = {
     left: 0,
     top: 0,
     backgroundColor: "white",
+  },
+  eye: {
+    justifyContent: "flex-end",
+  },
+  filter: {
+    backgroundColor: "black",
+    opacity: 0.8,
+    height: "100%",
+    width: "100%",
+  },
+  forgotPWText: {
+    color: "#3796ff",
+    textDecorationLine: "underline",
+  },
+  forgotPWWrapper: {
+    marginBottom: 10,
+    left: 85,
+  },
+  initialScreenSubWrapper: {
+    width: "80%",
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+  logo: {
+    marginTop: 25,
+    marginBottom: 25,
+    resizeMode: "stretch",
+  },
+  microsoftButton: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderColor: "dark grey",
+    borderWidth: 1,
+    width: "100%",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  microsoftButtonText: {
+    marginLeft: -44,
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+  microsoftIcon: {
+    width: 44,
+    height: 44,
+  },
+  space: {
+    height: 10,
+  },
+  text: {
+    textAlign: "center",
+    width: "100%",
+    fontWeight: "bold",
+    color: "white",
   },
 };
 
