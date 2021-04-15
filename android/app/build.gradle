@@ -104,6 +104,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [
+            appAuthRedirectScheme: 'com.okta.dev-75313886.okta.com:/callback'
+        ]
     }
     splits {
         abi {
@@ -154,3 +157,5 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
 }
+
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

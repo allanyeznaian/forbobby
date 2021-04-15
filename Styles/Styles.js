@@ -167,6 +167,30 @@ export const global = {
   lightGrey: { backgroundColor: "lightgrey" },
 };
 
+export const authOKTA = {
+  oktaButton: {
+    flexDirection: "row",
+    backgroundColor: "#F4F4F4",
+    borderColor: "dark grey",
+    borderWidth: 1,
+    width: "100%",
+    marginLeft: "auto",
+    marginRight: "auto",
+    height: 44,
+    textAlign: "center",
+  },
+  oktaButtonText: {
+    marginLeft: -5,
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+  oktaIcon: {
+    marginLeft: 5,
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+};
+
 export const barCodeScanner = {
   barCodeWrapper: {
     backgroundColor: "black",
@@ -758,24 +782,7 @@ export const login = {
     marginBottom: 25,
     resizeMode: "stretch",
   },
-  microsoftButton: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    borderColor: "dark grey",
-    borderWidth: 1,
-    width: "100%",
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  microsoftButtonText: {
-    marginLeft: -44,
-    marginTop: "auto",
-    marginBottom: "auto",
-  },
-  microsoftIcon: {
-    width: 44,
-    height: 44,
-  },
+
   space: {
     height: 10,
   },
@@ -836,6 +843,27 @@ export const main = {
   width100: {
     //global.width100
     width: "100%",
+  },
+};
+
+export const MicrosoftLoginHandler = {
+  microsoftButton: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderColor: "dark grey",
+    borderWidth: 1,
+    width: "100%",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  microsoftButtonText: {
+    marginLeft: -44,
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+  microsoftIcon: {
+    width: 44,
+    height: 44,
   },
 };
 

@@ -22,10 +22,10 @@ import {
 // const URL_PREFIX = "http://signshare.com/";
 
 //LOCAL DEV
-// const URL_PREFIX = "http://pangeaprint.com/";
+const URL_PREFIX = "http://pangeaprint.com/";
 
 //MOBILE DEV
-const URL_PREFIX = "http://www.pangea-usa.com/";
+// const URL_PREFIX = "http://www.pangea-usa.com/";
 
 const headers = {
   Accept: "text/plain",
@@ -655,6 +655,64 @@ export async function data_check_date(body) {
 
     let responseJson = await response.text();
     var json = JSON.parse(responseJson.replace('{"d":null}', ""));
+    return json;
+  } catch (error) {
+    var e = new Error("dummy");
+    const errorObject = {
+      component: constructor.name,
+      function: e.stack.split("\n")[0].replace(/\@.*/g, ""),
+      errorMessage: error,
+    };
+    addError(errorObject);
+    return "network error";
+  }
+}
+
+//dev-{oktaID}.oktapreview.com/oauth2/default/v1/userinfo
+//authentication
+export async function get_claims_OKTA() {
+  try {
+    let response = await fetch(
+      "https://dev-75313886.oktapreview.com/oauth2/default/v1/userinfo",
+      {
+        method: "GET",
+        // headers: headers,
+        // body: JSON.stringify(body),
+      }
+    );
+    let responseJson = await response.text();
+    // var json = JSON.parse(responseJson.replace('{"d":null}', ""));
+    alert(JSON.stringify(responseJson));
+    return responseJson;
+  } catch (error) {
+    var e = new Error("dummy");
+    const errorObject = {
+      component: constructor.name,
+      function: e.stack.split("\n")[0].replace(/\@.*/g, ""),
+      errorMessage: error,
+    };
+    addError(errorObject);
+    return "network error";
+  }
+}
+export async function try_logging_in_email(body) {
+  try {
+    let response = await fetch(
+      URL_PREFIX + "controls/mobileservice.asmx/LogInMobileUserEmail",
+      {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body),
+      }
+    );
+
+    let responseJson = await response.text();
+    var json = JSON.parse(responseJson.replace('{"d":null}', ""));
+    let deptsArrayStr = JSON.stringify(json.Model.levelDepartments);
+    let deptsArr = JSON.parse(deptsArrayStr);
+    let defDept = deptsArr[0];
+    defaultDepartment(defDept);
+
     return json;
   } catch (error) {
     var e = new Error("dummy");

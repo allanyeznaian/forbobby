@@ -5,14 +5,24 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#import <UIKit/UIKit.h>
-#import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
+// #import <UIKit/UIKit.h>
+// #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
+// #import <React/RCTBridgeDelegate.h>
+// #import <UMCore/UMAppDelegateWrapper.h>
+
+// @interface AppDelegate : UMAppDelegateWrapper <RCTBridgeDelegate>
+
+// @property (nonatomic, strong) UMModuleRegistryAdapter *moduleRegistryAdapter;
+// @property (nonatomic, strong) UIWindow *window;
+
+// @end
 #import <React/RCTBridgeDelegate.h>
-#import <UMCore/UMAppDelegateWrapper.h>
+#import <UIKit/UIKit.h>
+#import "RNAppAuthAuthorizationFlowManager.h"
 
-@interface AppDelegate : UMAppDelegateWrapper <RCTBridgeDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, RCTBridgeDelegate, RNAppAuthAuthorizationFlowManager>
 
-@property (nonatomic, strong) UMModuleRegistryAdapter *moduleRegistryAdapter;
 @property (nonatomic, strong) UIWindow *window;
+@property (nonatomic, weak) id<RNAppAuthAuthorizationFlowManagerDelegate> authorizationFlowManagerDelegate;
 
 @end

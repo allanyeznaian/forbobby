@@ -130,7 +130,6 @@ export default class PrintScreen extends Component {
     this.setState({ url: "", showPDF: false, isLoading: false });
   };
   saveItems = (e) => {
-    console.log(e);
     this.props.keepItems([e], "ADD_ITEM", this.props.currentSignTypeID);
     const arr2 = array(this.props.currentSignTypeID);
     this.setState({ storeArr: arr2 });

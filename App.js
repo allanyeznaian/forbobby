@@ -1,15 +1,21 @@
-import React, { Component } from "react";
+import React, { Fragment } from "react";
 import {
   Platform,
+  SafeAreaView,
+  StyleSheet,
   ScrollView,
   Dimensions,
   // PanResponder,
+  View,
+  Text,
   StatusBar,
   YellowBox,
   LogBox,
 } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import AppNavigator from "./navigation/AppNavigator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Login from "./windows/Login";
 
 //temp disable yellow warning box
 console.disableYellowBox = true;
@@ -38,6 +44,14 @@ const state = {
   multiEditFirstTime: false,
   errorArr: [],
   multipleSelectedHandlerArray: [],
+  oktaLogoWidth: 0,
+  platform: "",
+  request: "",
+  response: "",
+  authInfo: "",
+  user: "",
+  pass: "",
+  triggerAuth: true,
 };
 export const resetLogout = () => {
   state.keepItemArraySign = [];
@@ -48,6 +62,123 @@ export const resetLogout = () => {
   state.multiEditFirstTime = false;
   state.errorArr = [];
   state.multipleSelectedHandlerArray = [];
+};
+
+export const createNewID = () => {
+  const id =
+    s4() +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    s4() +
+    s4();
+  id.toString();
+  return id;
+};
+
+export const getTriggerAuth = () => {
+  return state.triggerAuth;
+};
+export const setTriggerAuth = (e) => {
+  state.triggerAuth = e;
+};
+
+export const setAuthInfo = async (platform, request, response) => {
+  state.platform = platform;
+  state.request = request;
+  state.response = response;
+  const obj = {
+    platform: platform,
+    request: request,
+    response: response,
+  };
+  authInfo = obj;
+  const id = "ID";
+  try {
+    console.log("THIS SHOULD CALL ONCE ONLY");
+    AsyncStorage.getItem(id, (err, result) => {
+      // const aaa = JSON.parse(result);
+      // console.log(
+      //   "FIRST RESULT",
+      //   result
+      //   // aaa.response.params.code,
+      //   // response.params.code
+      // );
+      if (result != null) {
+        // setTimeout(() => {
+        //   console.log("GOOOD 1111111111");
+        //   // state.user = "ck10";
+        //   // state.pass = "phoenix";
+        //   // Login.testing("result");
+        // }, 10000);
+      } else {
+        AsyncStorage.setItem(
+          id,
+          JSON.stringify(obj)
+          // , (a, b) => {
+          //   console.log(a, b);
+          //   AsyncStorage.getItem(id, (err, resultInner) => {
+          //     // console.log("SECOND RESULT", resultInner);
+          //     if (resultInner != null) {
+          //       setTimeout(() => {
+          //         console.log("BADDD");
+          //         // Login.testing("resultInner");
+          //       }, 10000);
+          //     }
+          // });
+          // });
+          // }
+        );
+      }
+    });
+  } catch {
+    // );
+
+    // , () => {
+    // AsyncStorage.getItem(idO, (err, result) => {
+    //   const { navigate } = this.props.navigation;
+    // console.log("Created!");
+    // this.toBeReset();
+    // navigate("Home", {
+    // home: true
+    // });
+    // }
+    console.log("NOT CREATED");
+  }
+
+  // console.log(platform, request, response);
+};
+export const getAuthInfo = (platform) => {
+  if (platform == "OKTA") {
+    console.log(2, state.request.length);
+    //if token is expired log in
+    if (state.request.length == +0 && state.response.length == +0) {
+      return "none";
+    } else {
+      return { request: state.request, response: state.response };
+    }
+  }
+  if (platform == "microsoft") {
+    return (
+      state.request.length * state.response.length !== 0
+        ? "none"
+        : state.request,
+      state.response
+    );
+  }
+};
+
+export const oktaLogoSetWidth = (e) => {
+  state.oktaLogoWidth = e;
+};
+export const oktaLogoGetWidth = () => {
+  return state.oktaLogoWidth;
 };
 
 export const setMultipleSelectedHandlerArr = (e) => {
@@ -165,7 +296,7 @@ export const keepItem = (data, action, signType_) => {
 //
 //
 
-export default class App extends Component {
+export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -203,6 +334,12 @@ export default class App extends Component {
     }
   };
 
+  componentDidUpdate = () => {
+    console.log(
+      "updating in app.js. i want to show this when the big settimeout gets called"
+    );
+  };
+
   handleLogin = (bool, data) => {
     if (bool === true) {
       this.setState({ isLoggedIn: true, data: data });
@@ -223,7 +360,7 @@ export default class App extends Component {
           height: this.state.height ? this.state.height : 0,
         }}
       >
-        <AppNavigator />
+        <AppNavigator screenProps={{ action: getAuthInfo("OKTA") }} />
       </ScrollView>
     );
   }
