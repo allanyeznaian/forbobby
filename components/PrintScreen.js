@@ -70,6 +70,7 @@ export default class PrintScreen extends Component {
 
   //this is wired to the x button of each SAVED item on this list
   deleteFromStore = (e) => {
+    console.log("TEEHEE");
     this.props.keepItems(e, "REMOVE_ITEM", this.props.currentSignTypeID);
     const arr2 = array(this.props.currentSignTypeID);
     this.setState({ storeArr: arr2 });

@@ -1,10 +1,10 @@
 {
-  "expoServerPort": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null,
+  "expoServerPort": 19000,
+  "expoServerNgrokUrl": "https://hm-kx2.ananun.pangeareact.exp.direct",
+  "packagerNgrokUrl": "https://packager.hm-kx2.ananun.pangeareact.exp.direct",
+  "ngrokPid": 17656,
   "devToolsPort": 19002,
-  "packagerPort": null,
-  "packagerPid": null,
+  "packagerPort": 19001,
+  "packagerPid": 10252,
   "webpackServerPort": null
 }

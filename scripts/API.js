@@ -22,10 +22,10 @@ import {
 // const URL_PREFIX = "http://signshare.com/";
 
 //LOCAL DEV
-const URL_PREFIX = "http://pangeaprint.com/";
+// const URL_PREFIX = "http://pangeaprint.com/";
 
 //MOBILE DEV
-// const URL_PREFIX = "http://www.pangea-usa.com/";
+const URL_PREFIX = "http://www.pangea-usa.com/";
 
 const headers = {
   Accept: "text/plain",
@@ -86,61 +86,66 @@ export async function data_get(
 ) {
   let state = {};
   const depObj = getDefaultDepartment();
-  if (isMultiEditFirstTime === true) {
-    body.batchTypeID = 0;
+  if (action === "UPCSearch") {
+    body.currentDepartmentID;
+  } else {
+    if (isMultiEditFirstTime === true) {
+      body.batchTypeID = 0;
+      if (body.currentDepartmentID == undefined) {
+        body.currentDepartmentID = depObj.DepartmentID;
+      }
+      body.currentSignTypeID = 1;
+      body.searchValues =
+        "thisIsAPlaceholderSoThatWhenYouPressMultiEditNoSignIsReturned";
+    }
+    if (body.currentSignTypeID == 6) {
+      body.currentSignTypeID = 6;
+    }
+    if (body.currentSignTypeID == 8) {
+      body.currentDepartmentID = 0;
+    }
+    // if (!body.batchTypeID == 0) {
+    //   body.currentDepartmentID = depObj.DepartmentID;
+    // }
     if (body.currentDepartmentID == undefined) {
       body.currentDepartmentID = depObj.DepartmentID;
     }
-    body.currentSignTypeID = 1;
-    body.searchValues =
-      "thisIsAPlaceholderSoThatWhenYouPressMultiEditNoSignIsReturned";
-  }
-  if (body.currentSignTypeID == 6) {
-    body.currentSignTypeID = 6;
-  }
-  if (body.currentSignTypeID == 8) {
-    body.currentDepartmentID = 0;
-  }
-  // if (!body.batchTypeID == 0) {
-  //   body.currentDepartmentID = depObj.DepartmentID;
-  // }
-  if (body.currentDepartmentID == undefined) {
-    body.currentDepartmentID = depObj.DepartmentID;
-  }
-  // if (!body.currentDepartmentID > -1) {
-  //   body.currentDepartmentID = depObj.DepartmentID;
-  // }
-  if (body.currentDepartmentID == undefined) {
-    body.currentDepartmentID = depObj.DepartmentID;
-  }
-  if (
-    body.batchTypeID == +0 &&
-    body.searchValues.length < 1 &&
-    body.currentSignTypeID == 8
-    //   ||
-    // (showMultiEdit == true && isMultiEditFirstTime != true)
-  ) {
-    body = state;
-  } else if (body.searchValues.length > 0 && isMultiEditFirstTime != true) {
-    outerState.wasPrevSearched = true;
-    state = body;
-    outerState.prevSearchedText = body.searchValues;
-  } else {
-    state = body;
+    // if (!body.currentDepartmentID > -1) {
+    //   body.currentDepartmentID = depObj.DepartmentID;
+    // }
+    if (body.currentDepartmentID == undefined) {
+      body.currentDepartmentID = depObj.DepartmentID;
+    }
+    if (
+      body.batchTypeID == +0 &&
+      body.searchValues.length < 1 &&
+      body.currentSignTypeID == 8
+      //   ||
+      // (showMultiEdit == true && isMultiEditFirstTime != true)
+    ) {
+      body = state;
+    } else if (body.searchValues.length > 0 && isMultiEditFirstTime != true) {
+      outerState.wasPrevSearched = true;
+      state = body;
+      outerState.prevSearchedText = body.searchValues;
+    } else {
+      state = body;
+    }
+
+    // if (outerState.wasPrevSearched == true && isMultiEditFirstTime != true) {
+    //   body = state;
+    //   body.searchValues = outerState.prevSearchedText;
+    // }
+    if (
+      action == "fromedit" ||
+      action == "frompromo" ||
+      action == "deleted" ||
+      action == "deletedMultiple"
+    ) {
+      body = outerState.prevBody;
+    }
   }
 
-  // if (outerState.wasPrevSearched == true && isMultiEditFirstTime != true) {
-  //   body = state;
-  //   body.searchValues = outerState.prevSearchedText;
-  // }
-  if (
-    action == "fromedit" ||
-    action == "frompromo" ||
-    action == "deleted" ||
-    action == "deletedMultiple"
-  ) {
-    body = outerState.prevBody;
-  }
   try {
     if (body.currentDepartmentID.DepartmentID != undefined) {
       body.currentDepartmentID = body.currentDepartmentID.DepartmentID;
@@ -149,7 +154,9 @@ export async function data_get(
       outerState.wasPrevSearched = true;
       state = body;
     }
-    console.log(body, action);
+    if (action === "UPCSearch") {
+      body.DepartmentID = +0;
+    }
     let response = await fetch(
       URL_PREFIX + "controls/mobileservice.asmx/LoadSignsByUserandBucket",
       {
@@ -165,8 +172,9 @@ export async function data_get(
       setAhead(json.Model.AheadInfo);
     }
     setMultiEditFirstTime(false);
-    outerState.prevBody = body;
-
+    if (action !== "UPCSearch") {
+      outerState.prevBody = body;
+    }
     return json;
   } catch (error) {
     var e = new Error("dummy");

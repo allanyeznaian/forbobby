@@ -32,15 +32,6 @@ import { addError } from "../App";
 import MicrosoftLoginHandler from "../scripts/MicrosoftLoginHandler";
 import { AuthManager } from "../scripts/AuthManager";
 
-import {
-  createConfig,
-  signIn,
-  signOut,
-  isAuthenticated,
-  getUser,
-  getUserFromIdToken,
-  EventEmitter,
-} from "@okta/okta-react-native";
 import configFile from "../auth.config";
 import OKTALoginHandler from "../AuthOKTA";
 
@@ -99,6 +90,7 @@ export default class Login extends Component {
       // pass: "hobart",
       // user: "mds3011",
       // pass: "eauclaire",
+      shouldLogin: false,
       authType: "",
       showInitialScreen: true,
       notificationText: "",
@@ -126,10 +118,15 @@ export default class Login extends Component {
   }
 
   componentDidUpdate = () => {
-    console.log("UPDATED");
+    console.log("222");
+    if (this.state.shouldLogin === true) {
+      this.setState({ shouldLogin: false });
+      this.continueLoggingIn();
+    }
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    console.log("ASDF");
     const data = nextProps.navigation.state.params;
     if (data) {
       return {
@@ -274,26 +271,16 @@ export default class Login extends Component {
     this.setState({ showInitialScreen: false });
   };
   signInWithOKTA = (e) => {
-    // console.log(
-    //   "THIS IS THE END GOAL< THIS IS WHERE IT SHOULD END UP IN THE END",
-    //   e
-    // );
-    // console.log(e, e, e, e, e, e, e, e, e, e, e, e, e, e, e);
-    // if (this.state.firstTimeAUTH === true) {
-    // setTimeout(() => {
-    this.setState(
-      {
-        // showInitialScreen: false,
+    setTimeout(() => {
+      this.setState({
+        shouldLogin: true,
         authType: "OKTA",
         user: "ck10",
         pass: "phoenix",
-      }
-      // () => {
-      // this.setState({ firstTimeAUTH: false });
+      });
+    });
 
-      // }
-    );
-    this.continueLoggingIn();
+    // this.continueLoggingIn();
     // console.log("GOOOOOD");
     // }, 10000);
     // }
@@ -304,9 +291,9 @@ export default class Login extends Component {
   };
   continueLoggingIn = () => {
     // this.onLoginClicked();
-    // setTimeout(() => {
-    //   this.onLoginClicked(this.state.authType);
-    // }, 200);
+    setTimeout(() => {
+      this.onLoginClicked(this.state.authType);
+    }, 200);
   };
   signInWithMicrosoft = async (e) => {
     console.log("::");

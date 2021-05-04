@@ -21,6 +21,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import { barCodeScanner, global } from "../../Styles/Styles";
 import CustomButton from "./CustomButton";
 import CustomTextInput from "./CustomTextInput";
+import { data_get_data_for_edit } from "../../scripts/API";
 
 export default function App(props) {
   const state = {
@@ -33,7 +34,12 @@ export default function App(props) {
     boolMainData: false,
     placeHolder: "",
     qrSize: Dimensions.get("window").width * 0.9,
+
+    toBeDisplayed: [],
+    isLoading: false,
+    signData: props.currentScannedItem,
   };
+
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   useEffect(() => {
@@ -49,6 +55,81 @@ export default function App(props) {
     })();
   }),
     [];
+
+  let toBeDisplayed = [];
+  const getMainSignData = () => {
+    const it = props.handleScanner(props.UPCText, "getStampId");
+    const arr = [];
+    if (!it) {
+      return null;
+    } else {
+      const body = {
+        // stampIDs: props.gridData_Data.stampId,
+        stampIDs: it.stampId,
+        includePromotionField: false,
+        includeSizeField: false,
+        includeQuantityField: false,
+      };
+      // if (this.state.signData.signLastUpdated < this.props.signLastUpdated(this.state.signId)) {
+      //   this.props.gridData_Cancel();
+      // }
+      data_get_data_for_edit(body).then((resp) => {
+        //validation, you can find if validation is needed in the if statement just below
+        for (let i = 0; i < resp.length; i++) {
+          const obj = {
+            label: resp[i].TemplateFieldName,
+            order: resp[i].TemplateFieldSortOrder,
+            value: "",
+            country: "",
+            fieldId: resp[i].FieldId,
+            arr: {
+              country: resp[i].fieldset.map((e) => {
+                return {
+                  country: e.FieldSetText,
+                  order: e.FieldSetOrder,
+                  fieldSetValue: e.FieldSetValue,
+                };
+              }),
+            },
+            signId: state.signData.id,
+            signLastUpdated: state.signData.signLastUpdated,
+            signfieldId: "",
+          };
+          for (let r = 0; r < it.completeSignObject.length; r++) {
+            if (it.completeSignObject[r].FieldID === resp[i].FieldId) {
+              obj.value = it.completeSignObject[r].SignFieldValue;
+              obj.fieldSetValue = it.completeSignObject[r].SignFieldValue;
+              obj.signfieldId = it.completeSignObject[r].SignFieldID;
+            }
+          }
+          arr.push(obj);
+        }
+        arr.sort((a, b) => a.order > b.order);
+        (state.templateFieldData = arr), (state.data = arr);
+        state.isLoading = false;
+        let test = "";
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i].fieldSetValue) {
+            if (arr[i].fieldSetValue.length > 0) {
+              test = test + arr[i].label + ": " + arr[i].fieldSetValue + "\n";
+            }
+          }
+        }
+        toBeDisplayed.push(test);
+        return test;
+      });
+      // }, 200);
+      return arr;
+    }
+    // for (let i = 0; i < this.props.superData.length; i++) {
+    //   if (this.props.superData[i].id === this.props.gridData_Data.id)
+    //     this.setState({ signData: this.props.superData[i] });
+    // }
+    // alert(JSON.stringify(it.stampId));
+
+    // setTimeout(() => {
+    // alert(JSON.stringify(props.currentScannedItem));
+  };
 
   addItem = (data, action) => {
     setScanned(false);
@@ -68,12 +149,15 @@ export default function App(props) {
     props.UPCReset();
   };
 
-  const handleBarCodeScanned = ({ type, data }, e) => {
+  const handleBarCodeScanned = async ({ type, data }, e) => {
+    await getMainSignData();
     if (props.UPCText != undefined) {
       if (props.UPCText.length > 0 && e === "fromSearch") {
         data = props.UPCText;
       }
     }
+
+    // BNOBBY QUESTIONS PREPARE FOR TOMORROW
 
     setScanned(true);
     setTimeout(() => {
@@ -109,7 +193,31 @@ export default function App(props) {
           state.response != "Barcode already scanned" &&
           props.auditMode === true
         ) {
-          state.response = "Good";
+          //get all these signfield values etc and compare with required contents of parsed BARCODE
+          // this condition happens when you scan a barcode that doesnt exist
+          state.response = "";
+          // (props.currentScannedItem.headeroneFieldLabel.length > 0
+          //   ? props.currentScannedItem.headeroneFieldLabel +
+          //     ": " +
+          //     props.currentScannedItem.headerone +
+          //     "\n"
+          //   : "") +
+          // (props.currentScannedItem.headertwoFieldLabel.length > 0
+          //   ? props.currentScannedItem.headertwoFieldLabel +
+          //     ": " +
+          //     props.currentScannedItem.headertwo +
+          //     "\n"
+          //   : "") +
+          // (props.currentScannedItem.headerthreeFieldLabel.length > 0
+          //   ? props.currentScannedItem.headerthreeFieldLabel +
+          //     ": " +
+          //     props.currentScannedItem.headerthree +
+          //     "\n"
+          //   : "");
+
+          // + (
+
+          // )
           props.UPCReset();
         }
         if (state.response === "add" && !props.auditMode) {
@@ -147,15 +255,50 @@ export default function App(props) {
           //       <Text>asdfasdfasdf</Text>
           //     </TouchableOpacity>
           //   </View>
-          // </Modal>
+          // </Modal>look here
           Alert.alert(
             "Items Do Not Match",
-            "Continue scanning?",
+            toBeDisplayed.length > 1 ? "error" : toBeDisplayed[0],
+            // getMainSignData()
+            // state.toBeDisplayed.map((e) => {
+            //   return (
+            //     e.fieldSetValue &&
+            //     e.fieldSetValue.length > 0 &&
+            //     e.label + ": " + e.fieldSetValue + "\n"
+            //   );
+            // })
+            // ),
+
+            // for (let i = 0; i < arr.length; i++) {
+            //   if (arr[i].fieldSetValue) {
+            //     if (arr[i].fieldSetValue.length > 0) {
+            //       console.log(arr[i].label);
+            //       state.test.push(arr[i].label + ": " + arr[i].fieldSetValue + "\n");
+            //     }
+            //   }
+            // }
+
+            // console.log(test);
+
+            // state.toBeDisplayed = arr;
             [
               {
-                text: "No",
+                text: "Done",
                 onPress: () => addItem({ type: type, data: data }, "auditMode"),
               },
+              {
+                text: "Scan",
+                onPress: () => continueAddingItem({ type: type, data: data }),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else if (state.response === "Barcode already scanned") {
+          Alert.alert(
+            "Barcode already scanned",
+            "Would you like to add to the queue anyways?",
+            [
+              { text: "No", onPress: () => setScanned(false) },
               {
                 text: "Yes",
                 onPress: () => continueAddingItem({ type: type, data: data }),
@@ -174,6 +317,7 @@ export default function App(props) {
         state.response = "asdf";
       }
     }, 150);
+    // }
   };
 
   if (Platform.OS === "ios" && hasPermission === null) {

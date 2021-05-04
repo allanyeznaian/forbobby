@@ -931,10 +931,8 @@ export default class Main extends Component {
           // if (getCalled() === false) {
           if (b === true) {
             this.getCall("", [], "", true);
-            console.log(3);
           } else {
             this.getCall();
-            console.log(4);
           }
           this.setState({ getCallTester: false });
           // }
@@ -971,6 +969,11 @@ export default class Main extends Component {
   //     }
   //   });
   // }
+
+  getSearchForUPC = (e) => {
+    // this.setState({searchText: e})
+    this.search(e, "audit");
+  };
 
   getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
     if (this.state.backToHome == true) {
@@ -2293,10 +2296,11 @@ export default class Main extends Component {
   cancelSearch = () => {
     this.setState({ showSearchPrompt: false });
   };
-  search = (e) => {
+  search = (e, action) => {
     if (this.state.batchTypeID == 0 || this.state.batchTypeID.length < 1) {
       this.refs.header.resetBatchHeader();
     }
+
     if (e.length > 1) {
       let strz = e.replace(/\s*,\s*/g, ",");
       let str = strz.replace(/\,*,\,*/g, ",");
@@ -2309,8 +2313,7 @@ export default class Main extends Component {
           batchTypeID: 0,
         },
         () => {
-          this.getCallFilter();
-          console.log(88);
+          this.getCallFilter(action);
         }
       );
     } else {
@@ -2625,6 +2628,7 @@ export default class Main extends Component {
                     >
                       {this.state.loadHome === true && (
                         <Home
+                          getSearchForUPC={this.getSearchForUPC}
                           audit={this.audit}
                           auditMode={this.state.auditMode}
                           backToHome={this.backToHome}

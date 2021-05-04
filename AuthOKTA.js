@@ -57,7 +57,7 @@ export default function App(props) {
     },
     discovery
   );
-  console.log(request);
+  // console.log(request);
   // console.log(response);
   React.useEffect(() => {
     if (
@@ -66,17 +66,17 @@ export default function App(props) {
       getTriggerAuth() === true
     ) {
       const { code } = response.params;
+      console.log(response);
       // console.log(response, request);
       // const something = TokenResponse.fromQueryParams();
       // console.log("SOMETHING THIS IS THE TOKEN", something);
       // console.log(response?.type);
-      // setTimeout(() => {
-      setTriggerAuth(false);
-      setAuthInfo("OKTA", request, response);
-      // props.doSomething(response);
-      props.onLoginClicked(response?.type);
-
-      // }, 10000);
+      setTimeout(() => {
+        setTriggerAuth(false);
+        setAuthInfo("OKTA", request, response);
+        // props.doSomething(response);
+        props.onLoginClicked(response?.type);
+      }, 10000);
       // setAuthInfo("OKTA", request, response);
       // if (getAuthInfo() != "none") {
       //   // props.onLoginClicked(response?.type);

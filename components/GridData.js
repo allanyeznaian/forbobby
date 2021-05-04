@@ -86,6 +86,9 @@ export default class GridData extends Component {
       keepItemArray: [],
       manageStore: false,
       multiEditActivate: false,
+      currentScannedItem: "",
+      confirmMultipleReviewArr: [],
+      confirmMultipleReviewVisible: false,
     };
     this.oldState = {};
     this.refsArray = [];
@@ -476,9 +479,47 @@ export default class GridData extends Component {
       this.setState({ showScanner: true, auditMode: false });
     }
   };
+  confirmMultipleReview = (e) => {
+    this.setState({
+      confirmMultipleReviewArr: e,
+      confirmMultipleReviewVisible: true,
+    });
+    // console.log(
+    //   "THIS IS IN CONFIRMMULTIPLEREVIEW",
+    //   e.map((a) => {
+    //     return JSON.stringify({ levelsignid: a.levelSignId, signID: a.id });
+    //   })
+    // );
+  };
   handleScanner = (data, bool, refreshBool) => {
+    // console.log(data);
+
+    //if item "does not exist"
+    //check to see what the department is
+    //
+    //get item from db INSTEAD of matrix array, then compare to the data that was scanned
+    //if scanned item is out of date and incorrect
+    //
+    //get item from db INSTEAD of matrix array and do the SAME THING IT ALREADY DOES
+    //BUT you need to create a new array for the matrix with the new items
+    //
+    let currentItemArr = [];
     this.setState({ textForBarcode: JSON.stringify(data) });
-    if (this.state.scannedArr.length == "0" && !data) {
+    let currentScannedItem = "";
+    if (bool === "getStampId") {
+      let newArr = [...this.props.home_Data];
+      for (let i = 0; i < newArr.length; i++) {
+        for (let z = 0; z < newArr[i].completeSignObject.length; z++) {
+          if (
+            newArr[i].completeSignObject[z].SignFieldValue ===
+            this.state.UPCText
+          ) {
+            currentScannedItem = newArr[i];
+            return newArr[i];
+          }
+        }
+      }
+    } else if (this.state.scannedArr.length == "0" && !data) {
       this.props.showScannedGrid(false);
       this.props.showScannedItems(false);
       this.setState({ showScanner: false });
@@ -491,7 +532,9 @@ export default class GridData extends Component {
         for (let i = 0; i < newArr.length; i++) {
           for (let z = 0; z < newArr[i].completeSignObject.length; z++) {
             if (newArr[i].completeSignObject[z].SignFieldValue === data.data) {
+              currentScannedItem = newArr[i];
               scannedArr.push(newArr[i]);
+              currentItemArr.push(newArr[i]);
             }
           }
         }
@@ -499,7 +542,9 @@ export default class GridData extends Component {
         for (let i = 0; i < newArr.length; i++) {
           for (let z = 0; z < newArr[i].completeSignObject.length; z++) {
             if (newArr[i].completeSignObject[z].SignFieldValue === data.data) {
+              currentScannedItem = newArr[i];
               scannedArr.push(newArr[i]);
+              currentItemArr.push(newArr[i]);
             }
           }
         }
@@ -513,13 +558,15 @@ export default class GridData extends Component {
             if (newArr[i].levelSignId === scannedArr[z].levelSignId) {
               scannedArr.splice(z, 1);
               scannedArr.push(newArr[i]);
+              currentScannedItem = newArr[i];
             }
           }
         }
       } else {
         this.setState({ showScanner: false });
       }
-      const unique = [...new Set(scannedArr)];
+      // const unique = [...new Set(scannedArr)]; this was changed because of wanting to add the same item to matrix
+      const unique = scannedArr;
 
       if (unique.length > 0) {
         this.props.showScannedItems(true);
@@ -537,6 +584,7 @@ export default class GridData extends Component {
           scannedArr: unique,
           arrayChunks: arrayChunks,
           showScannedItems: unique.length > 0 ? true : false,
+          currentScannedItem: currentScannedItem,
         },
         () => {
           this.reloadData();
@@ -545,6 +593,21 @@ export default class GridData extends Component {
             this.selectAll("audit");
           }
         }
+      );
+    }
+    if (currentItemArr.length > 1) {
+      // Alert.alert("MULTIPLE ITEMS WITH THE SAME UPC, PLEASE CHECK SELECTED ITEMS");
+      Alert.alert(
+        "MULTIPLE ITEMS WITH THE SAME UPC DETECTED",
+        "PLEASE MANUALLY REVIEW THE CHECKMARKED ITEMS",
+        [
+          // { text: "Cancel", onPress: null },
+          {
+            text: "OK",
+            onPress: () => this.confirmMultipleReview(currentItemArr),
+          },
+        ]
+        // { cancelable: true }
       );
     }
     this.setState({ UPCText: "" });
@@ -597,14 +660,16 @@ export default class GridData extends Component {
   removeScannedItemFromArray = (e) => {
     const arr = [...this.state.scannedArr];
     const arrChunk = [...this.state.arrayChunks[this.state.chunkIndex]];
-    console.log(
-      arrChunk.map((a, index) => {
-        return a.levelSignId === e;
-      })
-    );
-    // arrChunk.map((a, index) => {
-    //   a.levelSignId === e && arrChunk.splice(index, 1);
-    // });
+    const mArr = [...this.state.multipleSelectedHandlerArray];
+
+    mArr.map((a, index) => {
+      a.levelSignId === e && mArr.splice(index, 1);
+    });
+    this.setState({ multipleSelectedHandlerArray: mArr });
+    arrChunk.map((a, index) => {
+      a.levelSignId === e && arrChunk.splice(index, 1);
+    });
+
     if (arr.length > 1) {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i].levelSignId === e) {
@@ -622,6 +687,7 @@ export default class GridData extends Component {
       });
       this.props.backToHome("goBackAllTheWay");
     } else {
+      this.props.backToHome("goBackAllTheWay");
       this.setState({ showScannedItems: false, scannedArr: [] });
     }
   };
@@ -693,6 +759,7 @@ export default class GridData extends Component {
       <View style={[global.column, gridData.headerFieldLabelWrapper]}>
         <View style={global.row}>
           <Text style={[gridData.gridSubItemText]}>
+            {JSON.stringify(data.index)}
             {data.item.headeroneFieldLabel
               ? data.item.headeroneFieldLabel + ": "
               : ""}
@@ -877,6 +944,53 @@ export default class GridData extends Component {
     this.setState({ UPCText: e });
   };
   render() {
+    // this will be to review multiple items that have the same UPC when auditing
+    // if (this.state.confirmMultipleReviewVisible === true) {
+    //   <Modal>
+    //   <SwipeListView
+    //   data={
+    //     this.state.showScannedItems === false
+    //       ? this.state.arrayChunks[this.state.chunkIndex]
+    //       : this.state.isFilteringScanned === true
+    //       ? this.state.filteredArr
+    //       : this.state.arrayChunks[this.state.chunkIndex]
+    //     // this.state.scannedArr
+    //   }
+    //   // windowSize={10}
+    //   renderItem={this.renderItem}
+    //   renderHiddenItem={
+    //     !this.props.nonEditable ? this.renderHiddenItem : () => {}
+    //   }
+    //   leftOpenValue={
+    //     this.props.auditMode === true
+    //       ? this.state.width / 3
+    //       : this.props.ahead === -2
+    //       ? 0.1
+    //       : this.props.home_EnableDeleteSelected === false
+    //       ? 0.1
+    //       : this.state.width / 3
+    //   }
+    //   rightOpenValue={-this.state.width / 2}
+    //   stopLeftSwipe={
+    //     this.props.auditMode === true
+    //       ? this.state.width / 3
+    //       : this.props.ahead === -2
+    //       ? 0.1
+    //       : this.props.home_EnableDeleteSelected === false
+    //       ? 0.1
+    //       : this.state.width / 3
+    //   }
+    //   friction={80}
+    //   stopRightSwipe={-this.state.width / 2}
+    //   // keyExtractor={(data, rowKey) => JSON.stringify(rowKey + 1)}
+    //   scrollEnabled={true}
+    //   showsVerticalScrollIndicator={true}
+    //   swipeToOpenVelocityContribution={76}
+    //   closeOnScroll={false}
+    //   closeOnRowPress={false}
+    // />
+    //   </Modal>;
+    // } else
     // this if statement allows for the component to refresh
     if (this.props.home_Trigger === false) {
       return (
@@ -904,10 +1018,12 @@ export default class GridData extends Component {
                   //   ? true
                   //   : false
                 }
+                currentScannedItem={this.state.currentScannedItem}
                 isForForm={false}
                 handleScanner={this.handleScanner}
                 mainData={this.props.home_Data}
                 scannedArr={this.state.scannedArr}
+                gridData_Data={this.state.data}
               />
             </Modal>
           )}
