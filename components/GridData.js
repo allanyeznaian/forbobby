@@ -344,6 +344,10 @@ export default class GridData extends Component {
   //checkbox method
   //this is the method that enables you to select/deselect multiple signs
   selectAll = (e) => {
+    if (e === "audit") {
+      this.showPrintScreen(true, "auditMode");
+      // this.setState({ allArrSelected: true });PUT SOMETHING HERE TO MAKE SURE THAT THEY ARE ALL SELECTED AFTER LEAVING BARCODESCANNER
+    }
     if (this.state.auditMode === true) {
       // setTimeout(() => {
       const arr = [...this.state.scannedArr];
@@ -384,9 +388,6 @@ export default class GridData extends Component {
       });
       setMultipleSelectedHandlerArr([]);
       this.reload();
-    }
-    if (e === "audit") {
-      this.showPrintScreen(true, "auditMode");
     }
   };
   multipleSelectedHandler = (id, bool, deleted) => {
@@ -759,7 +760,7 @@ export default class GridData extends Component {
       <View style={[global.column, gridData.headerFieldLabelWrapper]}>
         <View style={global.row}>
           <Text style={[gridData.gridSubItemText]}>
-            {JSON.stringify(data.index)}
+            {/* {JSON.stringify(data.index)} */}
             {data.item.headeroneFieldLabel
               ? data.item.headeroneFieldLabel + ": "
               : ""}
