@@ -48,6 +48,7 @@ export default class GridData extends Component {
     super(props);
     this._isMounted = false;
     this.state = {
+      isFocusedScanner: false,
       UPCText: "",
       showExitScannedButton: false,
       multiEditTrigger: false,
@@ -89,6 +90,7 @@ export default class GridData extends Component {
       currentScannedItem: "",
       confirmMultipleReviewArr: [],
       confirmMultipleReviewVisible: false,
+      togglerFromBarcodeScanner: "audit",
     };
     this.oldState = {};
     this.refsArray = [];
@@ -473,11 +475,19 @@ export default class GridData extends Component {
   };
   showScanner = (bool, action) => {
     if (bool === true || bool === false) {
-      this.setState({ auditMode: action === "Audit" ? true : false }, () =>
-        this.setState({ showScanner: true })
+      this.setState(
+        {
+          togglerFromBarcodeScanner: "audit",
+          auditMode: action === "Audit" ? true : false,
+        },
+        () => this.setState({ showScanner: true })
       );
     } else {
-      this.setState({ showScanner: true, auditMode: false });
+      this.setState({
+        togglerFromBarcodeScanner: "audit",
+        showScanner: true,
+        auditMode: false,
+      });
     }
   };
   confirmMultipleReview = (e) => {
@@ -719,6 +729,16 @@ export default class GridData extends Component {
   activateEditFromPrint = (data) => {
     this.edit(data);
   };
+  printFromScanner = (action, UPC) => {
+    //get the levelsignid if sign exists
+    //printscreen.publishprint
+    // if (UPC.length < 15) {
+    //   //parse here to get upc out
+    // }
+    if (action === "scannerSearch") {
+      this.props.getCall(action, UPC);
+    }
+  };
   //renders the rows
   renderItem = (data, rowKey) => (
     // this.props.loading(false),
@@ -944,6 +964,18 @@ export default class GridData extends Component {
   onChangeText = (e) => {
     this.setState({ UPCText: e });
   };
+  //THIS IS ONLY FOR IF THE CAMERA IS GONNA BE USED
+  // isFocused = (e) => {
+  //   if (typeof e === "boolean") {
+  //     console.log("this is a boolean");
+  //     this.setState({ isFocusedScanner: e });
+  //   } else {
+  //     return this.state.isFocusedScanner;
+  //   }
+  // };
+  toggleFromBarcodeScanner = (e) => {
+    this.setState({ togglerFromBarcodeScanner: e });
+  };
   render() {
     // this will be to review multiple items that have the same UPC when auditing
     // if (this.state.confirmMultipleReviewVisible === true) {
@@ -1002,6 +1034,9 @@ export default class GridData extends Component {
           {this.state.showScanner === true && (
             <Modal>
               <BarCodeScannerComponent
+                isFocused={this.isFocused}
+                toggle={this.toggleFromBarcodeScanner}
+                toggler={this.state.togglerFromBarcodeScanner}
                 UPCReset={this.UPCReset}
                 UPCText={this.state.UPCText}
                 onChangeText={this.onChangeText}
@@ -1019,12 +1054,17 @@ export default class GridData extends Component {
                   //   ? true
                   //   : false
                 }
+                getCall={this.printFromScanner}
                 currentScannedItem={this.state.currentScannedItem}
                 isForForm={false}
                 handleScanner={this.handleScanner}
                 mainData={this.props.home_Data}
                 scannedArr={this.state.scannedArr}
                 gridData_Data={this.state.data}
+                levelID={this.state.levelID}
+                // levelSign={this.state.currentScannedItem[0].levelSignId}
+                levelUserInfoId={this.state.levelUserInfoId}
+                currentSignTypeID={this.state.currentSignTypeID}
               />
             </Modal>
           )}

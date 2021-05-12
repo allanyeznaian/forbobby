@@ -52,6 +52,7 @@ const state = {
   user: "",
   pass: "",
   triggerAuth: true,
+  levelSignIdStore: "",
 };
 export const resetLogout = () => {
   state.keepItemArraySign = [];
@@ -88,6 +89,16 @@ export const createNewID = () => {
     s4();
   id.toString();
   return id;
+};
+
+export const levelSignIdStore = (e) => {
+  if (e === "get") {
+    return state.levelSignIdStore;
+  } else {
+    state.levelSignIdArr = e.map((a) => {
+      return a.LevelSignID;
+    });
+  }
 };
 
 export const getTriggerAuth = () => {

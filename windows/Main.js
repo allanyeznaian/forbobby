@@ -51,6 +51,7 @@ import {
   getCalled,
   setCalled,
   resetLogout,
+  levelSignIdStore,
 } from "../App";
 console.disableYellowBox = true;
 export default class Main extends Component {
@@ -970,141 +971,173 @@ export default class Main extends Component {
   //   });
   // }
 
-  getSearchForUPC = (e) => {
-    // this.setState({searchText: e})
-    this.search(e, "audit");
-  };
-
   getCall = (e, newArr, idForScanner, isMultiEditFirstTime) => {
-    if (this.state.backToHome == true) {
-      e = "fromedit";
-    }
-    let headeroneFieldLabel = "";
-    let headertwoFieldLabel = "";
-    let headerthreeFieldLabel = "";
-    //this gets hit right away
-    // make parsing efficient
-    //update this.state.arrgrid
-    if (isMultiEditFirstTime == true) {
-      setCalled(false);
-      // isMultiEditFirstTime = true;
-      setTimeout(() => {
-        this.setState({ isLoading: false });
-      }, 1000);
-    }
-    if (getCalled() === false) {
-      setCalled(true);
+    if (e === "scannerSearch") {
+      const body = {
+        currentAhead: -1,
+        currentLevelID: this.state.data.data.Model.LevelID,
+        currentSignTypeID: 8,
+        currentLevelTypeID: this.state.levelTypeID,
+        currentDepartmentID: 0,
+        batchTypeID: 0,
+        searchValues: newArr,
+      };
+      let lsiArr = [];
+      data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
+        (resp) => {
+          //if success then set UPCText to empty string
+
+          // console.log(
+          //   "HALAHALA",
+          //   resp.Model.Signs.map((e) => {
+          //     return e.LevelSignID;
+          //   })
+          // );
+          // return resp.Model.Signs.map((e) => {
+          //   return (lsiArr = e.LevelSignID);
+          // });
+          levelSignIdStore(resp.Model.Signs);
+        }
+
+        //take lsiArr to barcodesanner
+      );
+    } else {
+      if (this.state.backToHome == true) {
+        e = "fromedit";
+      }
+      let headeroneFieldLabel = "";
+      let headertwoFieldLabel = "";
+      let headerthreeFieldLabel = "";
+      //this gets hit right away
+      // make parsing efficient
+      //update this.state.arrgrid
       if (isMultiEditFirstTime == true) {
-        // this.setState({currentDepartmentID:})
+        setCalled(false);
+        // isMultiEditFirstTime = true;
+        setTimeout(() => {
+          this.setState({ isLoading: false });
+        }, 1000);
       }
-      // if (this.state.searchText.length > 0) {
-      //   this.setState({ isSearched: true, currentDepartmentID: 0 });
-      // }
-      if (
-        this.state.searchText.length > 0 &&
-        this.state.currentSignTypeID === 8
-      ) {
-        this.setState({
-          prevSearchedText: this.state.searchText,
-          isSearchedOriginally: true,
-          isSearched: true,
-          batchTypeID: 0,
-          currentDepartmentID: 0,
-        });
-      } else if (this.state.searchText.length == +0) {
-        this.setState({
-          prevSearchedText: "",
-          isSearched: this.state.showMultiEdit === false ? false : true,
-          isSearchedOriginally:
-            this.state.showMultiEdit === false ? false : true,
-          searchText: "",
-        });
-      }
-      this.setState({ isLoading: true, showSearchPrompt: false });
-
-      if (this.state.showprintBatchScreen) {
-        this.setState({ isLoading: false });
-      }
-      setTimeout(() => {
+      if (getCalled() === false) {
+        setCalled(true);
+        if (isMultiEditFirstTime == true) {
+          // this.setState({currentDepartmentID:})
+        }
+        // if (this.state.searchText.length > 0) {
+        //   this.setState({ isSearched: true, currentDepartmentID: 0 });
+        // }
         if (
-          this.state.showOrderStockScreen === false &&
-          this.state.showprintBatchScreen === false &&
-          this.state.showMultiEdit === false
+          this.state.searchText.length > 0 &&
+          this.state.currentSignTypeID === 8
         ) {
-          this.refs.refsHomeGrid.resetPagination();
-        }
-      }, 200);
-
-      if (!this.state.batchTypeID == 0 && isMultiEditFirstTime === false) {
-        this.setState({ reload: true });
-        if (e === "deletedMultiple") {
           this.setState({
-            shouldNotify: true,
-            notificationText: "Signs Deleted",
+            prevSearchedText: this.state.searchText,
+            isSearchedOriginally: true,
+            isSearched: true,
+            batchTypeID: 0,
+            currentDepartmentID: 0,
           });
-          this.refs.refsHomeGrid.deleteFromArray(newArr);
-        }
-        if (e === "deleted") {
+        } else if (this.state.searchText.length == +0) {
           this.setState({
-            shouldNotify: true,
-            notificationText: "Sign Deleted",
+            prevSearchedText: "",
+            isSearched: this.state.showMultiEdit === false ? false : true,
+            isSearchedOriginally:
+              this.state.showMultiEdit === false ? false : true,
+            searchText: "",
           });
         }
+        this.setState({ isLoading: true, showSearchPrompt: false });
 
-        //the api call body data is all stored in state, coming
-        //from other components
-        //for example, if you choose "Next Ad", that will send over
-        //the correct ahead type and trigger this post request
-        //and populate the grid and correct dates
-        const body = {
-          currentAhead: this.state.currentAhead,
-          currentLevelID: this.state.data.data.Model.LevelID,
-          currentSignTypeID: this.state.currentSignTypeID,
-          currentLevelTypeID: this.state.levelTypeID,
-          currentDepartmentID: this.state.currentDepartmentID,
-          batchTypeID:
-            this.state.searchText.length > 0
-              ? 0
-              : this.state.batchTypeID
-              ? this.state.batchTypeID
-              : 0,
-          searchValues:
-            this.state.batchTypeID.length < 1
-              ? this.state.isSearched === true
-                ? this.state.prevSearchedText
-                : this.state.searchText
-              : this.state.searchText,
-        };
-
+        if (this.state.showprintBatchScreen) {
+          this.setState({ isLoading: false });
+        }
         setTimeout(() => {
           if (
-            body.currentAhead != this.state.prevBody[0].currentAhead ||
-            body.currentLevelID != this.state.prevBody[0].currentLevelID ||
-            body.currentSignTypeID !=
-              this.state.prevBody[0].currentSignTypeID ||
-            body.currentLevelTypeID !=
-              this.state.prevBody[0].currentLevelTypeID ||
-            body.currentDepartmentID !=
-              this.state.prevBody[0].currentDepartmentID ||
-            body.batchTypeID != this.state.prevBody[0].batchTypeID ||
-            this.state.showprintBatchScreen == false
+            this.state.showOrderStockScreen === false &&
+            this.state.showprintBatchScreen === false &&
+            this.state.showMultiEdit === false
           ) {
-            this.setState({ showScannedGrid: false, showScannedItems: false });
-            if (
-              this.state.showBatchEditScreen === false &&
-              this.state.showprintBatchScreen === false &&
-              this.state.showPrintScreen === false &&
-              this.state.showScannedGrid === true &&
-              this.state.showScannedItems === true
-            ) {
-              this.refs.refsHomeGrid.noScanner();
-            }
+            this.refs.refsHomeGrid.resetPagination();
           }
-        }, 50);
-        //this is the actual api call
+        }, 200);
 
-        data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
-          (resp) => {
+        if (!this.state.batchTypeID == 0 && isMultiEditFirstTime === false) {
+          this.setState({ reload: true });
+          if (e === "deletedMultiple") {
+            this.setState({
+              shouldNotify: true,
+              notificationText: "Signs Deleted",
+            });
+            this.refs.refsHomeGrid.deleteFromArray(newArr);
+          }
+          if (e === "deleted") {
+            this.setState({
+              shouldNotify: true,
+              notificationText: "Sign Deleted",
+            });
+          }
+
+          //the api call body data is all stored in state, coming
+          //from other components
+          //for example, if you choose "Next Ad", that will send over
+          //the correct ahead type and trigger this post request
+          //and populate the grid and correct dates
+          const body = {
+            currentAhead: this.state.currentAhead,
+            currentLevelID: this.state.data.data.Model.LevelID,
+            currentSignTypeID: this.state.currentSignTypeID,
+            currentLevelTypeID: this.state.levelTypeID,
+            currentDepartmentID: this.state.currentDepartmentID,
+            batchTypeID:
+              this.state.searchText.length > 0
+                ? 0
+                : this.state.batchTypeID
+                ? this.state.batchTypeID
+                : 0,
+            searchValues:
+              this.state.batchTypeID.length < 1
+                ? this.state.isSearched === true
+                  ? this.state.prevSearchedText
+                  : this.state.searchText
+                : this.state.searchText,
+          };
+
+          setTimeout(() => {
+            if (
+              body.currentAhead != this.state.prevBody[0].currentAhead ||
+              body.currentLevelID != this.state.prevBody[0].currentLevelID ||
+              body.currentSignTypeID !=
+                this.state.prevBody[0].currentSignTypeID ||
+              body.currentLevelTypeID !=
+                this.state.prevBody[0].currentLevelTypeID ||
+              body.currentDepartmentID !=
+                this.state.prevBody[0].currentDepartmentID ||
+              body.batchTypeID != this.state.prevBody[0].batchTypeID ||
+              this.state.showprintBatchScreen == false
+            ) {
+              this.setState({
+                showScannedGrid: false,
+                showScannedItems: false,
+              });
+              if (
+                this.state.showBatchEditScreen === false &&
+                this.state.showprintBatchScreen === false &&
+                this.state.showPrintScreen === false &&
+                this.state.showScannedGrid === true &&
+                this.state.showScannedItems === true
+              ) {
+                this.refs.refsHomeGrid.noScanner();
+              }
+            }
+          }, 50);
+          //this is the actual api call
+
+          data_get(
+            body,
+            isMultiEditFirstTime,
+            this.state.showMultiEdit,
+            e
+          ).then((resp) => {
             this.setState({
               timeLoggedIn: new Date().getTime(),
               prevBody: [body],
@@ -1302,75 +1335,81 @@ export default class Main extends Component {
                 isLoading: false,
               });
             }
+          });
+        } else {
+          if (e === "deletedMultiple") {
+            this.setState({
+              shouldNotify: true,
+              notificationText: "Signs Deleted",
+            });
+            this.refs.refsHomeGrid.deleteFromArray(newArr);
           }
-        );
-      } else {
-        if (e === "deletedMultiple") {
-          this.setState({
-            shouldNotify: true,
-            notificationText: "Signs Deleted",
-          });
-          this.refs.refsHomeGrid.deleteFromArray(newArr);
-        }
-        if (e === "deleted") {
-          this.setState({
-            shouldNotify: true,
-            notificationText: "Sign Deleted",
-          });
-        }
+          if (e === "deleted") {
+            this.setState({
+              shouldNotify: true,
+              notificationText: "Sign Deleted",
+            });
+          }
 
-        //the api call body data is all stored in state, coming
-        //from other components
-        //for example, if you choose "Next Ad", that will send over
-        //the correct ahead type and trigger this post request
-        //and populate the grid and correct dates
-        const body = {
-          currentAhead: this.state.currentAhead,
-          currentLevelID: this.state.data.data.Model.LevelID,
-          currentSignTypeID: this.state.currentSignTypeID,
-          currentLevelTypeID: this.state.levelTypeID,
-          currentDepartmentID: this.state.currentDepartmentID,
-          batchTypeID:
-            this.state.searchText.length > 0
-              ? 0
-              : this.state.batchTypeID
-              ? this.state.batchTypeID
-              : 0,
+          //the api call body data is all stored in state, coming
+          //from other components
+          //for example, if you choose "Next Ad", that will send over
+          //the correct ahead type and trigger this post request
+          //and populate the grid and correct dates
+          const body = {
+            currentAhead: this.state.currentAhead,
+            currentLevelID: this.state.data.data.Model.LevelID,
+            currentSignTypeID: this.state.currentSignTypeID,
+            currentLevelTypeID: this.state.levelTypeID,
+            currentDepartmentID: this.state.currentDepartmentID,
+            batchTypeID:
+              this.state.searchText.length > 0
+                ? 0
+                : this.state.batchTypeID
+                ? this.state.batchTypeID
+                : 0,
 
-          searchValues:
-            this.state.batchTypeID.length < 1
-              ? this.state.isSearched === true
-                ? this.state.prevSearchedText
-                : this.state.searchText
-              : this.state.searchText,
-        };
-        setTimeout(() => {
-          if (
-            body.currentAhead != this.state.prevBody[0].currentAhead ||
-            body.currentLevelID != this.state.prevBody[0].currentLevelID ||
-            body.currentSignTypeID !=
-              this.state.prevBody[0].currentSignTypeID ||
-            body.currentLevelTypeID !=
-              this.state.prevBody[0].currentLevelTypeID ||
-            body.currentDepartmentID !=
-              this.state.prevBody[0].currentDepartmentID ||
-            body.batchTypeID != this.state.prevBody[0].batchTypeID
-          ) {
-            this.setState({ showScannedGrid: false, showScannedItems: false });
+            searchValues:
+              this.state.batchTypeID.length < 1
+                ? this.state.isSearched === true
+                  ? this.state.prevSearchedText
+                  : this.state.searchText
+                : this.state.searchText,
+          };
+          setTimeout(() => {
             if (
-              this.state.showBatchEditScreen === false &&
-              this.state.showprintBatchScreen === false &&
-              this.state.showPrintScreen === false &&
-              this.state.showScannedGrid === true &&
-              this.state.showScannedItems === true
+              body.currentAhead != this.state.prevBody[0].currentAhead ||
+              body.currentLevelID != this.state.prevBody[0].currentLevelID ||
+              body.currentSignTypeID !=
+                this.state.prevBody[0].currentSignTypeID ||
+              body.currentLevelTypeID !=
+                this.state.prevBody[0].currentLevelTypeID ||
+              body.currentDepartmentID !=
+                this.state.prevBody[0].currentDepartmentID ||
+              body.batchTypeID != this.state.prevBody[0].batchTypeID
             ) {
-              this.refs.refsHomeGrid.noScanner();
+              this.setState({
+                showScannedGrid: false,
+                showScannedItems: false,
+              });
+              if (
+                this.state.showBatchEditScreen === false &&
+                this.state.showprintBatchScreen === false &&
+                this.state.showPrintScreen === false &&
+                this.state.showScannedGrid === true &&
+                this.state.showScannedItems === true
+              ) {
+                this.refs.refsHomeGrid.noScanner();
+              }
             }
-          }
-        }, 50);
+          }, 50);
 
-        data_get(body, isMultiEditFirstTime, this.state.showMultiEdit, e).then(
-          (resp) => {
+          data_get(
+            body,
+            isMultiEditFirstTime,
+            this.state.showMultiEdit,
+            e
+          ).then((resp) => {
             // let farr = [];
             // let i = 0;
             // while (i < resp.Model.Signs.length) {
@@ -1624,22 +1663,22 @@ export default class Main extends Component {
                 isLoading: false,
               });
             }
-          }
-        );
-      }
-      if (
-        this.state.showScannedItems === true &&
-        this.state.showScannedGrid === true
-      ) {
-        this.setState({ showScannedItems: false }, () =>
-          this.setState({ showScannedItems: true })
-        );
-      }
-      setTimeout(() => {
-        if (this.state.showprintBatchScreen === true) {
-          this.setState({ isLoading: false });
+          });
         }
-      }, 200);
+        if (
+          this.state.showScannedItems === true &&
+          this.state.showScannedGrid === true
+        ) {
+          this.setState({ showScannedItems: false }, () =>
+            this.setState({ showScannedItems: true })
+          );
+        }
+        setTimeout(() => {
+          if (this.state.showprintBatchScreen === true) {
+            this.setState({ isLoading: false });
+          }
+        }, 200);
+      }
     }
   };
 

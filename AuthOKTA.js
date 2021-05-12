@@ -18,6 +18,8 @@ import AuthSession from "expo-auth-session";
 import { get_claims_OKTA } from "./scripts/API";
 import { authOKTA, global } from "./Styles/Styles";
 import {
+  // expo-auth-session - expected version range: ~3.0.0 - actual version installed: ^3.2.3
+  // - expo-linking - expected version range: ~2.0.0 - actual version installed: ^2.2.3
   oktaLogoSetWidth,
   oktaLogoGetWidth,
   setAuthInfo,

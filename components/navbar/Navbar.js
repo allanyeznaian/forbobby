@@ -35,7 +35,7 @@ export default class Navbar extends Component {
       a.SignTypeID > b.SignTypeID ? 1 : b.SignTypeID > a.SignTypeID ? -1 : 0
     );
     // arr.splice(1, 0, { Sign: "Audit", SignTypeID: "Audit" });
-    arr.splice(2, 0, { Sign: "Batch Edit", SignTypeID: "Batch Edit" });
+    arr.splice(1, 0, { Sign: "Batch Edit", SignTypeID: "Batch Edit" });
     // if(this.props.LevelUserDefaultSignTypeID === 4){
 
     // }

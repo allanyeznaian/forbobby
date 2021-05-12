@@ -84,6 +84,8 @@ export default class Login extends Component {
       // pass: "thibodaux",
       // user: "pst1803",
       // pass: "petsmart",
+      // user: "pst1804",
+      // pass: "springfield",
       // user: "pst0124",
       // pass: "petsmart",
       // user: "svt8747",
@@ -527,15 +529,7 @@ export default class Login extends Component {
             />
             <View style={login.space} />
             <CustomButton
-              disabled={
-                this.state.isLoading === true
-                  ? true
-                  : this.state.pass.length * this.state.user.length > 0
-                  ? this.state.pass.length > 1
-                    ? false
-                    : true
-                  : true
-              }
+              disabled={this.state.isLoading === true ? true : false}
               text="Cancel"
               clicked={() => {
                 this.setState({ showInitialScreen: true });

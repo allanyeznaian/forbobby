@@ -22,6 +22,7 @@ import { barCodeScanner, global } from "../../Styles/Styles";
 import CustomButton from "./CustomButton";
 import CustomTextInput from "./CustomTextInput";
 import { data_get_data_for_edit } from "../../scripts/API";
+import { levelSignIdStore } from "../../App";
 
 export default function App(props) {
   const state = {
@@ -38,6 +39,9 @@ export default function App(props) {
     toBeDisplayed: [],
     isLoading: false,
     signData: props.currentScannedItem,
+
+    qp: false,
+    au: true,
   };
 
   const [hasPermission, setHasPermission] = useState(null);
@@ -57,7 +61,7 @@ export default function App(props) {
     [];
 
   let toBeDisplayed = [];
-  const getMainSignData = () => {
+  const getMainSignData = async () => {
     const it = props.handleScanner(props.UPCText, "getStampId");
     const arr = [];
     if (!it) {
@@ -118,7 +122,6 @@ export default function App(props) {
         toBeDisplayed.push(test);
         return test;
       });
-      // }, 200);
       return arr;
     }
     // for (let i = 0; i < this.props.superData.length; i++) {
@@ -129,6 +132,38 @@ export default function App(props) {
 
     // setTimeout(() => {
     // alert(JSON.stringify(props.currentScannedItem));
+  };
+
+  const toggle = (e) => {
+    if (e === "audit" && props.toggler != "audit") {
+      props.toggle(e);
+    } else if (e === "quickprint" && props.toggler != "quickprint") {
+      props.toggle(e);
+    }
+  };
+
+  print = async (data) => {
+    // console.log(
+    //   "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    //   JSON.stringify(data)
+    // );
+    const test = getMainSignData();
+    const obj = {
+      buttonCall: "Print",
+      LevelID: props.levelID,
+      batchName: "",
+      levelSignsToPrint: toBeDisplayed[0],
+      batchTypeIDs: 0,
+      LevelUserInfoID: props.levelUserInfoId,
+      SignTypeID: props.currentSignTypeID,
+      SupressDepartmentSlip: false,
+      SupressMarginNotation: false,
+      SupressStoreSlip: false,
+      ComingleStocks: false,
+    };
+    setTimeout(() => {
+      console.log(obj);
+    }, 100);
   };
 
   addItem = (data, action) => {
@@ -149,174 +184,221 @@ export default function App(props) {
     props.UPCReset();
   };
 
-  const handleBarCodeScanned = async ({ type, data }, e) => {
-    await getMainSignData();
-    if (props.UPCText != undefined) {
-      if (props.UPCText.length > 0 && e === "fromSearch") {
-        data = props.UPCText;
+  const handleBarCodeScanned = async ({ type, data }, e, action) => {
+    //ONLY FOR IF CAMERA IS BEING USED
+    // if(isdevice zebra button is active)
+    // scanner light only active while in audit/zebra print mode
+    // if(item scanned turn off scanner light and keep off until let go and pressed again and beep)
+    // if(item not found, or error make another beep)
+    // if (props.isFocused() === false) {
+    if (props.toggler === "quickprint") {
+      if (props.UPCText != undefined) {
+        if (props.UPCText.length > 0 && e === "fromSearch") {
+          data = props.UPCText;
+        }
       }
-    }
+      let levelSignId = "";
+      setTimeout(() => {
+        props.getCall("scannerSearch", data),
+          () => {
+            setTimeout(() => {
+              console.log(
+                "THIS IS LEVELSIGNID IN HANDLBARCODE SCANNED",
+                levelSignIdStore("get")
+              );
+            }, 100);
+          };
+        // myPromisez.then(() => {});
+        //make sure everything is being set properly
+        //above method should GET the lvlsignid which is succesful
+        //it must set the
+        //DO A CHECK HERE TO SEE IF THERE"S MORE THAN ONE
+        //ALSO DO A CHECK HERE FOR THE DANGLER
+      }, 150);
 
-    // BNOBBY QUESTIONS PREPARE FOR TOMORROW
+      // setTimeout(() => {}, 1000);
+    } else {
+      await getMainSignData();
+      if (props.UPCText != undefined) {
+        if (props.UPCText.length > 0 && e === "fromSearch") {
+          data = props.UPCText;
+        }
+      }
 
-    setScanned(true);
-    setTimeout(() => {
-      if (props.isForForm === true) {
-        props.scannedItem(data);
-      } else {
-        state.item = false;
-        props.scannedArr.map((e) => {
-          return e.completeSignObject.map((a) => {
-            return (
-              a.SignFieldValue === data &&
-              ((state.response = "Barcode already scanned"),
-              (state.placeHolder = data))
-            );
-          });
-        });
-        if (state.response != "Barcode already scanned") {
-          props.mainData.map((e) => {
+      // BNOBBY QUESTIONS PREPARE FOR TOMORROW
+
+      setScanned(true);
+      setTimeout(() => {
+        console.log(props.scannedItem);
+        if (props.isForForm === true) {
+          props.scannedItem(data);
+        } else {
+          state.item = false;
+          props.scannedArr.map((e) => {
             return e.completeSignObject.map((a) => {
-              return a.SignFieldValue === data && (state.response = "add");
+              return (
+                a.SignFieldValue === data &&
+                ((state.response = "Barcode already scanned"),
+                (state.placeHolder = data))
+              );
             });
           });
-        }
-        if (
-          state.response != "add" &&
-          state.response != "Barcode already scanned" &&
-          props.auditMode != true
-        ) {
-          //look
-          state.response = "Sign does not exist";
-        } else if (
-          state.response != "add" &&
-          state.response != "Barcode already scanned" &&
-          props.auditMode === true
-        ) {
-          //get all these signfield values etc and compare with required contents of parsed BARCODE
-          // this condition happens when you scan a barcode that doesnt exist
-          state.response = "";
-          // (props.currentScannedItem.headeroneFieldLabel.length > 0
-          //   ? props.currentScannedItem.headeroneFieldLabel +
-          //     ": " +
-          //     props.currentScannedItem.headerone +
-          //     "\n"
-          //   : "") +
-          // (props.currentScannedItem.headertwoFieldLabel.length > 0
-          //   ? props.currentScannedItem.headertwoFieldLabel +
-          //     ": " +
-          //     props.currentScannedItem.headertwo +
-          //     "\n"
-          //   : "") +
-          // (props.currentScannedItem.headerthreeFieldLabel.length > 0
-          //   ? props.currentScannedItem.headerthreeFieldLabel +
-          //     ": " +
-          //     props.currentScannedItem.headerthree +
-          //     "\n"
-          //   : "");
+          if (state.response != "Barcode already scanned") {
+            props.mainData.map((e) => {
+              return e.completeSignObject.map((a) => {
+                return a.SignFieldValue === data && (state.response = "add");
+              });
+            });
+          }
+          if (
+            state.response != "add" &&
+            state.response != "Barcode already scanned" &&
+            props.auditMode != true
+          ) {
+            //look
+            //nothing happening here
+            state.response = "Signa does not exist";
+          } else if (
+            state.response != "add" &&
+            state.response != "Barcode already scanned" &&
+            props.auditMode === true
+          ) {
+            props.getCall("scannerSearch", data);
+            //get all these signfield values etc and compare with required contents of parsed BARCODE
+            // this condition happens when you scan a barcode that doesnt exist
+            // console.log(props.scannedItem);
 
-          // + (
+            state.response = "Sign does not exist";
 
-          // )
-          props.UPCReset();
-        }
-        if (state.response === "add" && !props.auditMode) {
+            // (props.currentScannedItem.headeroneFieldLabel.length > 0
+            //   ? props.currentScannedItem.headeroneFieldLabel +
+            //     ": " +
+            //     props.currentScannedItem.headerone +
+            //     "\n"
+            //   : "") +
+            // (props.currentScannedItem.headertwoFieldLabel.length > 0
+            //   ? props.currentScannedItem.headertwoFieldLabel +
+            //     ": " +
+            //     props.currentScannedItem.headertwo +
+            //     "\n"
+            //   : "") +
+            // (props.currentScannedItem.headerthreeFieldLabel.length > 0
+            //   ? props.currentScannedItem.headerthreeFieldLabel +
+            //     ": " +
+            //     props.currentScannedItem.headerthree +
+            //     "\n"
+            //   : "");
+
+            // + (
+
+            // )
+            props.UPCReset();
+          }
+          if (state.response === "add" && !props.auditMode) {
+            state.response = "asdf";
+            return Alert.alert(
+              "",
+              "Continue scanning items?",
+              [
+                {
+                  text: "No",
+                  onPress: () => addItem({ type: type, data: data }),
+                },
+                {
+                  text: "Yes",
+                  onPress: () => continueAddingItem({ type: type, data: data }),
+                },
+              ],
+              { cancelable: false }
+            );
+          } else if (state.response === "add" && props.auditMode === true) {
+            state.response = "asdf";
+            // return something();
+
+            // Alert.alert("", "IT FOUND THE ITEM AND SHOULD NOW COMPARE", [
+            //   { text: "GOOD?", onPress: () => {} },
+            // ]);
+            // <Modal
+            //   visible={true}
+            //   animationType="fade"
+            //   transparent={true}
+            //   style={{ width: "50%", height: "30%" }}
+            // >
+            //   <View>
+            //     <TouchableOpacity style={{ backgroundColor: "green" }}>
+            //       <Text>asdfasdfasdf</Text>
+            //     </TouchableOpacity>
+            //   </View>
+            // </Modal>look here
+            Alert.alert(
+              "Items Do Not Match",
+              toBeDisplayed.length > 1 ? "error" : toBeDisplayed[0],
+              // getMainSignData()
+              // state.toBeDisplayed.map((e) => {
+              //   return (
+              //     e.fieldSetValue &&
+              //     e.fieldSetValue.length > 0 &&
+              //     e.label + ": " + e.fieldSetValue + "\n"
+              //   );
+              // })
+              // ),
+
+              // for (let i = 0; i < arr.length; i++) {
+              //   if (arr[i].fieldSetValue) {
+              //     if (arr[i].fieldSetValue.length > 0) {
+              //       console.log(arr[i].label);
+              //       state.test.push(arr[i].label + ": " + arr[i].fieldSetValue + "\n");
+              //     }
+              //   }
+              // }
+
+              // console.log(test);
+
+              // state.toBeDisplayed = arr;
+              [
+                {
+                  text: "Print",
+                  onPress: () => print(data),
+                },
+                {
+                  text: "Done",
+                  onPress: () =>
+                    addItem({ type: type, data: data }, "auditMode"),
+                },
+                {
+                  text: "Scan",
+                  onPress: () => continueAddingItem({ type: type, data: data }),
+                },
+              ],
+              { cancelable: false }
+            );
+          } else if (state.response === "Barcode already scanned") {
+            Alert.alert(
+              "Barcode already scanned",
+              "Would you like to add to the queue anyways?",
+              [
+                { text: "No", onPress: () => setScanned(false) },
+                {
+                  text: "Yes",
+                  onPress: () => continueAddingItem({ type: type, data: data }),
+                },
+              ],
+              { cancelable: false }
+            );
+          } else {
+            Alert.alert(
+              "",
+              state.response,
+              [{ text: "OK", onPress: () => setScanned(false) }],
+              { cancelable: false }
+            );
+          }
           state.response = "asdf";
-          return Alert.alert(
-            "",
-            "Continue scanning items?",
-            [
-              {
-                text: "No",
-                onPress: () => addItem({ type: type, data: data }),
-              },
-              {
-                text: "Yes",
-                onPress: () => continueAddingItem({ type: type, data: data }),
-              },
-            ],
-            { cancelable: false }
-          );
-        } else if (state.response === "add" && props.auditMode === true) {
-          state.response = "asdf";
-          // return something();
-
-          // Alert.alert("", "IT FOUND THE ITEM AND SHOULD NOW COMPARE", [
-          //   { text: "GOOD?", onPress: () => {} },
-          // ]);
-          // <Modal
-          //   visible={true}
-          //   animationType="fade"
-          //   transparent={true}
-          //   style={{ width: "50%", height: "30%" }}
-          // >
-          //   <View>
-          //     <TouchableOpacity style={{ backgroundColor: "green" }}>
-          //       <Text>asdfasdfasdf</Text>
-          //     </TouchableOpacity>
-          //   </View>
-          // </Modal>look here
-          Alert.alert(
-            "Items Do Not Match",
-            toBeDisplayed.length > 1 ? "error" : toBeDisplayed[0],
-            // getMainSignData()
-            // state.toBeDisplayed.map((e) => {
-            //   return (
-            //     e.fieldSetValue &&
-            //     e.fieldSetValue.length > 0 &&
-            //     e.label + ": " + e.fieldSetValue + "\n"
-            //   );
-            // })
-            // ),
-
-            // for (let i = 0; i < arr.length; i++) {
-            //   if (arr[i].fieldSetValue) {
-            //     if (arr[i].fieldSetValue.length > 0) {
-            //       console.log(arr[i].label);
-            //       state.test.push(arr[i].label + ": " + arr[i].fieldSetValue + "\n");
-            //     }
-            //   }
-            // }
-
-            // console.log(test);
-
-            // state.toBeDisplayed = arr;
-            [
-              {
-                text: "Done",
-                onPress: () => addItem({ type: type, data: data }, "auditMode"),
-              },
-              {
-                text: "Scan",
-                onPress: () => continueAddingItem({ type: type, data: data }),
-              },
-            ],
-            { cancelable: false }
-          );
-        } else if (state.response === "Barcode already scanned") {
-          Alert.alert(
-            "Barcode already scanned",
-            "Would you like to add to the queue anyways?",
-            [
-              { text: "No", onPress: () => setScanned(false) },
-              {
-                text: "Yes",
-                onPress: () => continueAddingItem({ type: type, data: data }),
-              },
-            ],
-            { cancelable: false }
-          );
-        } else {
-          Alert.alert(
-            "",
-            state.response,
-            [{ text: "OK", onPress: () => setScanned(false) }],
-            { cancelable: false }
-          );
         }
-        state.response = "asdf";
-      }
-    }, 150);
+      }, 150);
+    }
+    // }
+
     // }
   };
 
@@ -407,6 +489,61 @@ export default function App(props) {
             />
           </View> */}
           <View style={{ backgroundColor: "transparent" }}>
+            <View style={[global.row, { alignSelf: "center" }]}>
+              <TouchableOpacity
+                style={{
+                  padding: 3,
+                  borderRadius: 2,
+                  borderWidth: props.toggler === "audit" ? 1 : 0,
+                  borderColor: "white",
+                  backgroundColor:
+                    props.toggler === "audit"
+                      ? "rgba(44, 68, 86, 0.7)"
+                      : "transparent",
+                }}
+                onPress={() => toggle("audit")}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 14,
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginTop: "auto",
+                    marginBottom: "auto",
+                  }}
+                >
+                  Audit
+                </Text>
+              </TouchableOpacity>
+              <View style={{ width: 15 }} />
+              <TouchableOpacity
+                style={{
+                  padding: 3,
+                  borderRadius: 2,
+                  borderWidth: props.toggler === "quickprint" ? 1 : 0,
+                  borderColor: "white",
+                  backgroundColor:
+                    props.toggler === "quickprint"
+                      ? "rgba(44, 68, 86, 0.7)"
+                      : "transparent",
+                }}
+                onPress={() => toggle("quickprint")}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 14,
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginTop: "auto",
+                    marginBottom: "auto",
+                  }}
+                >
+                  Zebra
+                </Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={[
                 { width: "80%", backgroundColor: "lightgrey" },
@@ -418,6 +555,13 @@ export default function App(props) {
               onChangeText={(e) => {
                 props.onChangeText(e);
               }}
+              //FOR IF CAMERA IS BEING USED
+              // onFocus={() => {
+              //   props.isFocused(true);
+              // }}
+              // onBlur={() => {
+              //   props.isFocused(false);
+              // }}
             />
             <TouchableOpacity
               style={[
