@@ -246,6 +246,7 @@ export async function data_post_publish_print_batches(body) {
     );
     let responseJson = await response.text();
     var json = JSON.parse(responseJson.replace('{"d":null}', ""));
+
     return json;
   } catch (error) {
     var e = new Error("dummy");

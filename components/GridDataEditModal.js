@@ -57,7 +57,11 @@ export default class GridDataEditModal extends Component {
       changedSignFieldArr: [],
       testData: [],
       proofArr: [],
-      // userId: "6a430ecf-a82c-4231-8cd0-12b70238d035",
+      //commonFieldIDs
+      //applies only to multiedit
+      //if multiple signs are selected, this array shows the fieldids that are shared
+      //
+      commonFieldIDs: [],
 
       offset: new Animated.Value(0),
       imageOffset: new Animated.Value(0),
@@ -174,12 +178,59 @@ export default class GridDataEditModal extends Component {
         includeSizeField: false,
         includeQuantityField: false,
       };
+      let compareArr = [];
+      // if (this.props.isMultiEditActive === true) {
+      //   const multSelct = this.props.multipleSelectedHandlerArray;
+      //   if (multSelct.length > 1) {
+      //     console.log(
+      //       multSelct.map((e) => {
+      //         return e.completeSignObject.map((a) => {
+      //           return a.FieldID;
+      //         });
+      //       })
+      //     );
+      //   }
+      //   // for (
+      //   //   let i = 0;
+      //   //   i < this.props.multipleSelectedHandlerArray.length;
+      //   //   i++
+      //   // ) {
+      //   //   const similarityArr = {
+      //   //     fieldId: this.props.multipleSelectedHandlerArray[
+      //   //       i
+      //   //     ].completeSignObject.map((e) => {
+      //   //       return e.FieldID;
+      //   //     }),
+      //   //     // signfieldid: this.props.multipleSelectedHandlerArray[
+      //   //     //   i
+      //   //     // ].completeSignObject.map((e) => {
+      //   //     //   return e.SignFieldID;
+      //   //     // }),
+      //   //   };
+
+      //   //   compareArr.push(similarityArr);
+      //   //   this.setState({ commonFieldIDs: compareArr });
+      //   //   //WHEN SAVING MAKE SURE THE CHANGED FIELDS DONT GET SAVED IF THE FIELD ID DOESNT EXIST
+      //   // }
+      //   let testArr = [];
+      //   // let finalArr = compareArr.map((e) => {
+      //   //   return e.fieldId.map((a) => {
+      //   //     return a;
+      //   //   });
+      //   // });
+      //   // for (let i = 0; i < compareArr.length; i++) {
+      //   //   compareArr[i].fieldId.map((e) => {
+      //   //     testArr.push(e);
+      //   //   });
+      //   // }
+      //   // this.setState({ commonFieldIDs: testArr });
+      // }
+
       // if (this.state.signData.signLastUpdated < this.props.signLastUpdated(this.state.signId)) {
       //   this.props.gridData_Cancel();
       // }
       data_get_data_for_edit(body).then((resp) => {
         //validation, you can find if validation is needed in the if statement just below
-
         const arr = [];
         for (let i = 0; i < resp.length; i++) {
           const obj = {
@@ -253,7 +304,6 @@ export default class GridDataEditModal extends Component {
 
   save = () => {
     //test call here for date/time
-    let arrCheck = [];
     setTimeout(() => {
       let arr = [];
       const cool = this.state.newCountryObj;
@@ -263,8 +313,6 @@ export default class GridDataEditModal extends Component {
       let header = "a";
       let brand = "a";
       let description = "a";
-      //look here
-      // alert(this.state.signData.signLastUpdated);
       for (let i = 0; i < this.state.data.length; i++) {
         if (this.state.data[i].label === "Sale Price") {
           salePrice = this.state.data[i].fieldSetValue;
@@ -346,25 +394,36 @@ export default class GridDataEditModal extends Component {
                   //zarr[z].stampId
                   FieldID: templateArr[i].FieldID,
                   SignFieldID: templateArr[i].SignFieldID,
-                  SignFieldValue: templateArr[i].SignFieldValue,
+                  SignFieldValue: !templateArr[i].SignFieldValue
+                    ? templateArr[i].FieldSetValue
+                    : templateArr[i].SignFieldValue,
                   SignID: zarr[a].id,
                 });
             }
           }
-          arrCheck = newArr;
+
+          for (let i = 0; i < newArr.length; i++) {
+            //purpose of this is to change the key from "FieldSetValue to SignFieldValue"
+            if (!newArr[i].SignFieldValue && newArr[i].FieldSetValue) {
+              let tempObj = {
+                FieldID: newArr[i].FieldID,
+                SignFieldValue: newArr[i].FieldSetValue,
+                SignFieldID: newArr[i].SignFieldID,
+                SignID: newArr[i].SignID,
+              };
+              newArr.splice(i, 1, tempObj);
+            }
+          }
           bodyContents = {
             jsonLocalSign: JSON.stringify(newArr),
             loggedInLevelID: this.props.levelId,
           };
         }
-        for (let i = 0; i < arr.length; i++) {}
         const body = JSON.stringify(bodyContents);
 
         data_save_edited(body).then((resp) => {
           if (resp.Handling === "success") {
-            //look
             const asdf = this.props.checkDate(bodyContents.jsonLocalSign);
-
             setTimeout(() => {
               if (
                 this.props.isScannedArrShowing === true &&
@@ -423,14 +482,41 @@ export default class GridDataEditModal extends Component {
   };
   dropdown = (e) => {
     const arr = [...this.state.data];
+    let object = {
+      SignFieldID: e.SignFieldID,
+      SignFieldValue: e.FieldSetValue,
+      FieldID: e.FieldID,
+      SignID: e.SignID,
+    };
     for (let i = 0; i < arr.length; i++) {
       if (arr[i].fieldId === e.FieldID) {
-        arr[i].value = e.Value;
-        arr[i].country = e.Value;
         arr[i].fieldSetValue = e.FieldSetValue;
       }
     }
-    this.setState({ data: arr, templateFieldData: arr });
+    let zArr = [...this.state.changedSignFieldArr];
+    if (zArr.length < 1) {
+      zArr.push(object);
+    } else {
+      var ind = zArr
+        .map((a) => {
+          return a.FieldID;
+        })
+        .indexOf(e.FieldID);
+      if (ind != -1) {
+        if (zArr[ind].FieldID === e.FieldID) {
+          zArr[ind].FieldSetValue = e.FieldSetValue;
+          zArr[ind].SignFieldValue = e.FieldSetValue;
+          zArr[ind].SignFieldID = e.SignFieldID;
+        }
+      } else {
+        zArr.push(e);
+      }
+    }
+    this.setState({
+      data: arr,
+      templateFieldData: arr,
+      changedSignFieldArr: zArr,
+    });
   };
   calendar = (e) => {
     const arr = [...this.state.data];
@@ -440,7 +526,30 @@ export default class GridDataEditModal extends Component {
         arr[i].fieldSetValue = e.FieldSetValue;
       }
     }
-    this.setState({ data: arr, templateFieldData: arr });
+    let zArr = [...this.state.changedSignFieldArr];
+    if (zArr.length < 1) {
+      zArr.push(e);
+    } else {
+      var ind = zArr
+        .map((a) => {
+          return a.FieldID;
+        })
+        .indexOf(e.FieldID);
+      if (ind != -1) {
+        if (zArr[ind].FieldID === e.FieldID) {
+          zArr[ind].FieldSetValue = e.FieldSetValue;
+          zArr[ind].SignFieldValue = e.FieldSetValue;
+          zArr[ind].SignFieldID = e.SignFieldID;
+        }
+      } else {
+        zArr.push(e);
+      }
+    }
+    this.setState({
+      data: arr,
+      templateFieldData: arr,
+      changedSignFieldArr: zArr,
+    });
   };
   checkboxHandler = (e) => {
     const arr = [...this.state.data];
@@ -455,7 +564,35 @@ export default class GridDataEditModal extends Component {
         }
       }
     }
-    this.setState({ data: arr, templateFieldData: arr });
+    let zArr = [...this.state.changedSignFieldArr];
+    if (e.FieldSetValue === "False") {
+      e.FieldSetValue = "True";
+    } else if (e.FieldSetValue === "True") {
+      e.FieldSetValue = "False";
+    }
+    if (zArr.length < 1) {
+      zArr.push(e);
+    } else {
+      var ind = zArr
+        .map((a) => {
+          return a.FieldID;
+        })
+        .indexOf(e.FieldID);
+      if (ind != -1) {
+        if (zArr[ind].FieldID === e.FieldID) {
+          zArr[ind].FieldSetValue = e.FieldSetValue;
+          zArr[ind].SignFieldValue = e.FieldSetValue;
+          zArr[ind].SignFieldID = e.SignFieldID;
+        }
+      } else {
+        zArr.push(e);
+      }
+    }
+    this.setState({
+      data: arr,
+      templateFieldData: arr,
+      changedSignFieldArr: zArr,
+    });
   };
   clickHandler = (e) => {
     this.setState({ selected: e });

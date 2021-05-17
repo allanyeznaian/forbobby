@@ -158,6 +158,9 @@ export default class Home extends Component {
     this.setState({ currentSignType: sign === "Tags" ? 8 : 1 });
   };
   multiEdit = () => {
+    // if(this.props.multiEdit === false){
+
+    // }
     this.props.multiEditActivate();
   };
   placeHol = () => {

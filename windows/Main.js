@@ -324,7 +324,6 @@ export default class Main extends Component {
     });
     if (action === "goBackAllTheWay") {
       this.refs.refsHomeGrid.exitScanned("fromedit");
-      console.log(1);
       this.getCall("fromedit");
       if (
         !this.state.showprintBatchScreen &&
@@ -399,11 +398,9 @@ export default class Main extends Component {
     this.setState({ currentAhead: e, isLoading: true }, () => {
       if (this.state.showMultiEdit === true) {
         this.getCallFilter(true);
-        console.log(11);
         this.setState({ isLoading: false });
       } else {
         this.getCallFilter();
-        console.log(22);
       }
     });
   };
@@ -847,7 +844,6 @@ export default class Main extends Component {
         () => {
           this.enableDeleteSelected([]);
           this.getCallFilter();
-          console.log(55);
         }
       );
     } else {
@@ -871,7 +867,6 @@ export default class Main extends Component {
         () => {
           this.enableDeleteSelected([]);
           this.getCallFilter();
-          console.log(66);
         }
       );
       if (this.state.loadHome === true) {
@@ -954,7 +949,6 @@ export default class Main extends Component {
     this.setState({ batchTypeID: batchTypeID, searchText: "" });
     setTimeout(() => {
       this.getCallFilter();
-      console.log(77);
     }, 10);
   };
   hideFilterGlitch = (bool) => {

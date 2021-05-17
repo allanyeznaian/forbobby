@@ -721,7 +721,7 @@ export default class GridData extends Component {
     }
   };
   multiEditActivate = () => {
-    this.setState({ multiEditActivate: true });
+    this.setState({ multiEditActivate: true, multiEditTrigger: false });
   };
   multiEditCancel = () => {
     this.setState({ multiEditActivate: false });
